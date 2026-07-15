@@ -4,8 +4,7 @@ A standalone [Model Context Protocol](https://modelcontextprotocol.org) server
 (**stdio** transport, TypeScript) that exposes the [Yamtrack](https://github.com/FuzzyGrim/Yamtrack)
 REST API as tools for LLMs (Claude Desktop, OpenCode, VS Code, Hermes, etc.).
 
-Unlike the in-repo Python server (`src/manage.py run_mcp`, HTTP only), this one
-runs on **any machine** and talks to a remote Yamtrack instance over its public
+It runs on **any machine** and talks to a Yamtrack instance over its public
 REST API. No Django code required.
 
 ## Requirements

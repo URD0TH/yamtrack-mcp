@@ -27,7 +27,7 @@ instance over HTTP.
 - Keep tool names and enums in sync with the API wiki.
 - Run `npm run build` before publishing; never commit `node_modules/` or `dist/`.
 - Commit in the `yamtrack-mcp` repo first; update `README.md` there for user-facing
-  changes and `wiki/MCP.md` in the parent for cross-server docs.
+  changes and `wiki/MCP.md` in the parent (the single MCP server docs).
 
 ## Verification
 
