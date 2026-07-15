@@ -15,10 +15,14 @@ instance over HTTP.
 
 ## Local Contracts
 
-- Entry: `src/index.ts` (`McpServer` + `StdioServerTransport`). Logs to stderr only.
+- Entry: `src/index.ts` (`McpServer` + transport selection). Logs to stderr only.
 - `src/client.ts`: `YamtrackClient` — REST wrapper, Bearer auth with the static API key.
 - `src/tools.ts`: tool definitions mapped 1:1 to REST endpoints (zod schemas).
 - Auth: a single static API key via `YAMTRACK_API_KEY`/`--token` (no JWT login or refresh).
+- Transports: `stdio` (default) uses the startup token; `http` (`--transport http`,
+  StreamableHTTP stateless on `POST /mcp`) authenticates per connection from the
+  `Authorization: Bearer <key>` header, falling back to the startup token when
+  the header is absent. Both forward the key as `Bearer` to the REST API.
 - Base URL: `YAMTRACK_BASE_URL` / `--base-url`, default `http://localhost:8000/api`.
 
 ## Work Guidance

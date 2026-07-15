@@ -1,7 +1,7 @@
 # yamtrack-mcp
 
 A standalone [Model Context Protocol](https://modelcontextprotocol.org) server
-(**stdio** transport, TypeScript) that exposes the [Yamtrack](https://github.com/FuzzyGrim/Yamtrack)
+(**stdio** or **http** transport, TypeScript) that exposes the [Yamtrack](https://github.com/FuzzyGrim/Yamtrack)
 REST API as tools for LLMs (Claude Desktop, OpenCode, VS Code, Hermes, etc.).
 
 It runs on **any machine** and talks to a Yamtrack instance over its public
@@ -37,13 +37,23 @@ The server authenticates to Yamtrack with a Bearer token. Precedence:
 
 | Option | Env var | Description |
 |--------|---------|-------------|
+| `--transport <type>` | – | `stdio` (default) or `http` |
 | `--base-url <url>` | `YAMTRACK_BASE_URL` | API base URL. Default `http://localhost:8000/api` |
-| `--token <token>` | `YAMTRACK_API_KEY` | Static API key |
+| `--token <token>` | `YAMTRACK_API_KEY` | Static API key (http fallback when no header) |
+| `--port <n>` | – | Port for `http` transport. Default `8080` |
 | `--username <user>` | – | Username (mint JWT at startup) |
 | `--password <pass>` | – | Password (mint JWT at startup) |
 | `--help` | – | Show usage |
 
 Read-only tools (`search_media`, `get_details`) work **without** authentication.
+
+### HTTP transport
+
+With `--transport http` the server listens on `POST /mcp` (StreamableHTTP,
+stateless). Each connection authenticates via the `Authorization: Bearer
+<token>` header it receives, falling back to `--token` / `YAMTRACK_API_KEY`
+when the header is absent. The token is then forwarded as a Bearer token to
+the Yamtrack REST API, exactly like the stdio transport.
 
 ## Tools
 
@@ -110,6 +120,23 @@ Enum values: `media_type` ∈ {`tv`, `movie`, `anime`, `manga`, `game`, `book`,
 
 Same `command`/`args` shape; pass the token via the `YAMTRACK_API_KEY` env var.
 
+### HTTP transport (any client that supports `url` + `headers`)
+
+```json
+{
+  "mcpServers": {
+    "yamtrack": {
+      "url": "http://localhost:8080/mcp",
+      "headers": { "Authorization": "Bearer <token>" }
+    }
+  }
+}
+```
+
+Run the server with `node dist/index.js --transport http` (optionally
+`--port <n>`). This mirrors how other HTTP MCP servers (e.g. Simkl) are
+configured.
+
 ## Development
 
 ```bash
@@ -121,16 +148,17 @@ npm run test     # vitest run
 npm run dev      # build + run
 ```
 
-Integration tests (`tests/server.test.ts`) drive every tool against an in-process
-mock REST API over `InMemoryTransport`, covering auth (static token, JWT login,
-JWT auto-refresh on 401) and request/response shapes.
+Integration tests (`tests/server.test.ts`, `tests/http.test.ts`) drive every tool
+against an in-process mock REST API over `InMemoryTransport` and HTTP, covering
+auth (static token, per-request Bearer header, fallback token) and
+request/response shapes.
 
 ## Project structure
 
 ```
 yamtrack-mcp/
 ├── src/
-│   ├── index.ts     # Entry: McpServer + StdioServerTransport, CLI args
+│   ├── index.ts     # Entry: transport selection (stdio/http), CLI args
 │   ├── client.ts    # YamtrackClient: REST wrapper, Bearer auth, JWT refresh
 │   └── tools.ts     # Tool definitions mapped to REST endpoints (zod schemas)
 ├── tests/           # Integration tests with a mock REST API
