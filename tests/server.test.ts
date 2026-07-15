@@ -62,6 +62,40 @@ describe("tool registry", () => {
     const { tools } = await h.mcp.listTools();
     expect(tools).toHaveLength(15);
   });
+
+  it("create_episode sends end_date when provided", async () => {
+    await h.mcp.callTool({
+      name: "create_episode",
+      arguments: {
+        media_id: "999",
+        source: "tmdb",
+        season_number: 1,
+        episode_number: 1,
+        end_date: "2024-01-02T12:30:00Z",
+      },
+    });
+    expect(h.mock.requests[0].path).toBe("/api/episodes/");
+    expect(h.mock.requests[0].body).toMatchObject({
+      media_id: "999",
+      source: "tmdb",
+      season_number: 1,
+      episode_number: 1,
+      end_date: "2024-01-02T12:30:00Z",
+    });
+  });
+
+  it("create_episode omits end_date when not provided", async () => {
+    await h.mcp.callTool({
+      name: "create_episode",
+      arguments: {
+        media_id: "999",
+        source: "tmdb",
+        season_number: 1,
+        episode_number: 1,
+      },
+    });
+    expect(h.mock.requests[0].body).not.toHaveProperty("end_date");
+  });
 });
 
 describe("read-only tools", () => {

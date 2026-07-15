@@ -211,6 +211,8 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       score: z.coerce.number().min(0).max(10).optional(),
       progress: z.coerce.number().int().min(0).optional(),
       notes: z.string().optional(),
+      start_date: z.string().optional().describe("Start date/time (ISO 8601)."),
+      end_date: z.string().optional().describe("End date/time (ISO 8601)."),
     },
     async (c, a) => {
       const body: Record<string, unknown> = {
@@ -222,6 +224,8 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       if (a.score !== undefined) body.score = a.score;
       if (a.progress !== undefined) body.progress = a.progress;
       if (a.notes !== undefined) body.notes = a.notes;
+      if (a.start_date !== undefined) body.start_date = a.start_date;
+      if (a.end_date !== undefined) body.end_date = a.end_date;
       return c.request("POST", `/media/${a.media_type}/create/`, { body });
     },
     client,
@@ -260,6 +264,8 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       score: z.coerce.number().min(0).max(10).optional(),
       progress: z.coerce.number().int().min(0).optional(),
       notes: z.string().optional(),
+      start_date: z.string().optional().describe("Start date/time (ISO 8601)."),
+      end_date: z.string().optional().describe("End date/time (ISO 8601)."),
     },
     async (c, a) => {
       const body: Record<string, unknown> = {};
@@ -267,6 +273,8 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       if (a.score !== undefined) body.score = a.score;
       if (a.progress !== undefined) body.progress = a.progress;
       if (a.notes !== undefined) body.notes = a.notes;
+      if (a.start_date !== undefined) body.start_date = a.start_date;
+      if (a.end_date !== undefined) body.end_date = a.end_date;
       return c.request("PATCH", `/media/${a.media_type}/${a.instance_id}/`, { body });
     },
     client,
@@ -344,6 +352,7 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       source: z.enum(SOURCES).describe("Provider source."),
       season_number: z.coerce.number().int().describe("Season number."),
       episode_number: z.coerce.number().int().describe("Episode number."),
+      end_date: z.string().optional().describe("Watch date/time (ISO 8601)."),
     },
     async (c, a) => {
       return c.request("POST", "/episodes/", {
@@ -352,6 +361,7 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
           source: a.source,
           season_number: a.season_number,
           episode_number: a.episode_number,
+          ...(a.end_date !== undefined ? { end_date: a.end_date } : {}),
         },
       });
     },
