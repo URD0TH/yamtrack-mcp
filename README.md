@@ -153,6 +153,18 @@ against an in-process mock REST API over `InMemoryTransport` and HTTP, covering
 auth (static token, per-request Bearer header, fallback token) and
 request/response shapes.
 
+## Resilience
+
+`supervise.sh` wraps the server and restarts it if it crashes, up to
+`YAMTRACK_MCP_MAX_RETRIES` attempts (default `5`, with a
+`YAMTRACK_MCP_RETRY_INTERVAL` seconds delay, default `2`). Each attempt and the
+final give-up are logged to stderr. After the limit is reached the supervisor
+exits. The server's own clean exit (code `0`) is not retried.
+
+```bash
+./supervise.sh --transport http --port 9123 --base-url http://10.0.0.5:8000/api
+```
+
 ## Project structure
 
 ```

@@ -7,7 +7,7 @@
   "bin": {
     "yamtrack-mcp": "dist/index.js"
   },
-  "files": ["dist"],
+  "files": ["dist", "supervise.sh"],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build",
