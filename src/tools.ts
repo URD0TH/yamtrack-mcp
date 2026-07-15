@@ -213,7 +213,11 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       notes: z.string().optional(),
     },
     async (c, a) => {
-      const body: Record<string, unknown> = { media_id: a.media_id, source: a.source };
+      const body: Record<string, unknown> = {
+        media_id: a.media_id,
+        source: a.source,
+        media_type: a.media_type,
+      };
       if (a.status !== undefined) body.status = a.status;
       if (a.score !== undefined) body.score = a.score;
       if (a.progress !== undefined) body.progress = a.progress;

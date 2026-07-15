@@ -133,6 +133,7 @@ describe("write tools", () => {
     expect(h.mock.requests[0].body).toMatchObject({
       media_id: "555",
       source: "tmdb",
+      media_type: "movie",
       status: "Completed",
       score: 8,
     });
