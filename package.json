@@ -1,0 +1,30 @@
+{
+  "name": "yamtrack-mcp",
+  "version": "0.1.0",
+  "description": "MCP server (stdio) that exposes Yamtrack's REST API as tools for LLMs",
+  "type": "module",
+  "bin": {
+    "yamtrack-mcp": "dist/index.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "dev": "tsc -p tsconfig.build.json && node dist/index.js",
+    "typecheck": "tsc",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "verify": "npm run typecheck && npm run lint && npm run test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.8"
+  }
+}

@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Test & lint caches
+coverage/
+.nyc_output/
+.vitest/
+*.log
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
