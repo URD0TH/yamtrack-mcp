@@ -3,12 +3,16 @@
   "version": "0.1.0",
   "description": "MCP server (stdio) that exposes Yamtrack's REST API as tools for LLMs",
   "type": "module",
+  "main": "dist/index.js",
   "bin": {
     "yamtrack-mcp": "dist/index.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build",
     "start": "node dist/index.js",
     "dev": "tsc -p tsconfig.build.json && node dist/index.js",
     "typecheck": "tsc",
