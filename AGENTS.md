@@ -9,6 +9,9 @@ instance over HTTP.
 ## Ownership
 
 - Owner: integrations/mcp. Depends only on the public REST API (`wiki/API.md`).
+- Tracked as a git submodule (`mcp/`) of the standalone repo
+  `https://github.com/URD0TH/yamtrack-mcp.git`. Commit and push changes in that
+  repo, then bump the submodule pointer in the parent Yamtrack repo.
 
 ## Local Contracts
 
@@ -23,6 +26,8 @@ instance over HTTP.
 - Add/change a tool when `wiki/API.md` endpoints, filters, or enums change.
 - Keep tool names and enums in sync with the API wiki.
 - Run `npm run build` before publishing; never commit `node_modules/` or `dist/`.
+- Commit in the `yamtrack-mcp` repo first; update `README.md` there for user-facing
+  changes and `wiki/MCP.md` in the parent for cross-server docs.
 
 ## Verification
 
