@@ -16,9 +16,9 @@ instance over HTTP.
 ## Local Contracts
 
 - Entry: `src/index.ts` (`McpServer` + `StdioServerTransport`). Logs to stderr only.
-- `src/client.ts`: `YamtrackClient` — REST wrapper, Bearer auth, JWT auto-refresh.
+- `src/client.ts`: `YamtrackClient` — REST wrapper, Bearer auth with the static API key.
 - `src/tools.ts`: tool definitions mapped 1:1 to REST endpoints (zod schemas).
-- Auth precedence: `YAMTRACK_JWT`/`--token`, else `--username`/`--password`.
+- Auth: a single static API key via `YAMTRACK_API_KEY`/`--token` (no JWT login or refresh).
 - Base URL: `YAMTRACK_BASE_URL` / `--base-url`, default `http://localhost:8000/api`.
 
 ## Work Guidance
@@ -34,8 +34,8 @@ instance over HTTP.
 - `npm run verify` runs typecheck (`tsc`), lint+format (`biome check`), and tests (`vitest run`).
 - `npm run build` compiles `src/` to `dist/` under `strict`.
 - Integration tests (`tests/server.test.ts`) drive every tool against an in-process
-  mock REST API over `InMemoryTransport`, covering auth (static token, JWT login,
-  JWT auto-refresh) and request/response shapes.
+  mock REST API over `InMemoryTransport`, covering auth (static API key) and
+  request/response shapes.
 - Smoke test: `node dist/index.js --help` and an MCP `initialize` + `tools/list`.
 
 ## Child DOX Index

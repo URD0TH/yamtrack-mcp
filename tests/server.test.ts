@@ -14,8 +14,6 @@ interface Harness {
 
 async function makeHarness(clientOpts: {
   token?: string;
-  username?: string;
-  password?: string;
   handler?: (req: import("./mock-api.js").RecordedRequest) => {
     status: number;
     body: unknown;
@@ -27,8 +25,6 @@ async function makeHarness(clientOpts: {
   const client = new YamtrackClient({
     baseUrl: mock.baseUrl,
     token: clientOpts.token,
-    username: clientOpts.username,
-    password: clientOpts.password,
   });
 
   const server = new McpServer({ name: "yamtrack", version: "0.1.0" });
@@ -184,54 +180,13 @@ describe("write tools", () => {
 });
 
 describe("authentication", () => {
-  it("mints a JWT from username/password and sends it", async () => {
-    const h = await makeHarness({
-      username: "u",
-      password: "p",
-      handler: (req) => {
-        if (req.path === "/api/token/") {
-          return { status: 200, body: { access: "fresh-access", refresh: "r" } };
-        }
-        return { status: 200, body: { ok: true } };
-      },
-    });
+  it("sends the static API key as a Bearer token", async () => {
+    const h = await makeHarness({ token: "static-token" });
     await h.mcp.callTool({
       name: "create_entry",
       arguments: { media_id: "1", source: "tmdb", media_type: "movie" },
     });
-    const login = h.mock.requests.find((r) => r.path === "/api/token/");
-    expect(login?.body).toMatchObject({ username: "u", password: "p" });
-    expect(h.mock.requests.at(-1)?.auth).toBe("Bearer fresh-access");
-    await h.stop();
-  });
-
-  it("auto-refreshes a JWT on 401", async () => {
-    const h = await makeHarness({
-      username: "u",
-      password: "p",
-      handler: (req) => {
-        if (req.path === "/api/token/") {
-          return { status: 200, body: { access: "old-access", refresh: "r" } };
-        }
-        if (req.path === "/api/token/refresh/") {
-          return { status: 200, body: { access: "new-access" } };
-        }
-        // First protected call 401s, refresh succeeds, retry 200s.
-        if (req.auth === "Bearer new-access") {
-          return { status: 200, body: { ok: true } };
-        }
-        return { status: 401, body: { detail: "expired" } };
-      },
-    });
-    const res = await h.mcp.callTool({
-      name: "list_tracked_media",
-      arguments: { media_type: "movie" },
-    });
-    const attempts = h.mock.requests.filter((r) => r.path === "/api/media/movie/");
-    expect(attempts).toHaveLength(2);
-    expect(attempts[0].auth).toBe("Bearer old-access");
-    expect(attempts[1].auth).toBe("Bearer new-access");
-    expect(text(res)).toContain("ok");
+    expect(h.mock.requests[0].auth).toBe("Bearer static-token");
     await h.stop();
   });
 

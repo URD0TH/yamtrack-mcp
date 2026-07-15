@@ -11,13 +11,12 @@ Usage:
 
 Options:
   --base-url <url>     Yamtrack API base URL (default: http://localhost:8000/api
-                       or YAMTRACK_BASE_URL env).
-  --token <token>      Static API token or JWT (default: YAMTRACK_JWT env).
-  --username <user>    Username to mint a JWT at startup.
-  --password <pass>    Password to mint a JWT at startup.
+                        or YAMTRACK_BASE_URL env).
+  --token <key>        Static API key (default: YAMTRACK_API_KEY env). This is the
+                        per-account token from Account settings -> Integrations.
   --help               Show this help.
 
-Auth precedence: --token/YAMTRACK_JWT, else --username/--password (auto-refresh).
+Auth: a single static API key authorizes both this server and the REST API.
 Read-only tools (search_media, get_details) work without authentication.
 `;
 
@@ -48,8 +47,6 @@ async function main(): Promise<void> {
   const client = new YamtrackClient({
     baseUrl: opts["base-url"],
     token: opts.token,
-    username: opts.username,
-    password: opts.password,
   });
 
   const server = new McpServer({ name: "yamtrack", version: "0.1.0" });

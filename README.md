@@ -30,7 +30,7 @@ node dist/index.js --help
 
 The server authenticates to Yamtrack with a Bearer token. Precedence:
 
-1. `--token <token>` / env `YAMTRACK_JWT` — a **static account API token**
+1. `--token <token>` / env `YAMTRACK_API_KEY` — a **static account API key**
    (recommended, never expires) or a JWT.
 2. `--username` + `--password` — mints a JWT at startup and **auto-refreshes**
    it on 401 (JWTs expire after 1h).
@@ -38,7 +38,7 @@ The server authenticates to Yamtrack with a Bearer token. Precedence:
 | Option | Env var | Description |
 |--------|---------|-------------|
 | `--base-url <url>` | `YAMTRACK_BASE_URL` | API base URL. Default `http://localhost:8000/api` |
-| `--token <token>` | `YAMTRACK_JWT` | Static token or JWT |
+| `--token <token>` | `YAMTRACK_API_KEY` | Static API key |
 | `--username <user>` | – | Username (mint JWT at startup) |
 | `--password <pass>` | – | Password (mint JWT at startup) |
 | `--help` | – | Show usage |
@@ -83,7 +83,7 @@ Enum values: `media_type` ∈ {`tv`, `movie`, `anime`, `manga`, `game`, `book`,
     "yamtrack": {
       "command": "node",
       "args": ["/abs/path/to/yamtrack-mcp/dist/index.js"],
-      "env": { "YAMTRACK_JWT": "<token>" }
+      "env": { "YAMTRACK_API_KEY": "<token>" }
     }
   }
 }
@@ -99,7 +99,7 @@ Enum values: `media_type` ∈ {`tv`, `movie`, `anime`, `manga`, `game`, `book`,
         "type": "stdio",
         "command": "node",
         "args": ["/abs/path/to/yamtrack-mcp/dist/index.js"],
-        "env": { "YAMTRACK_JWT": "<token>" }
+        "env": { "YAMTRACK_API_KEY": "<token>" }
       }
     }
   }
@@ -108,7 +108,7 @@ Enum values: `media_type` ∈ {`tv`, `movie`, `anime`, `manga`, `game`, `book`,
 
 ### VS Code (`.vscode/mcp.json`) / Hermes (`~/.hermes/config.yaml`)
 
-Same `command`/`args` shape; pass the token via the `YAMTRACK_JWT` env var.
+Same `command`/`args` shape; pass the token via the `YAMTRACK_API_KEY` env var.
 
 ## Development
 
