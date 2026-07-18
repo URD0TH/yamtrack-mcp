@@ -56,4 +56,5 @@ instance over HTTP.
 
 ## Child DOX Index
 
-- None (leaf module).
+- `skill/` — Agent Skill (Agent Skills / plugin format) documenting MCP usage,
+  install, and per-client configuration. See `skill/AGENTS.md`.

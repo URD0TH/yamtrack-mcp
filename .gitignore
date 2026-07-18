@@ -24,3 +24,7 @@ coverage/
 .vscode/
 *.swp
 */yamtrack-mcp-*.tgz
+
+# DOX scaffold is not part of the module's tracked content
+AGENTS.md
+AGENTS*.md

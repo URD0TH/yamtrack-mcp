@@ -1,0 +1,14 @@
+{
+  "name": "yamtrack-mcp-skill",
+  "version": "1.0.0",
+  "description": "Agent skill for using and configuring the Yamtrack MCP server (search, track, update, and query media in Yamtrack through any MCP-capable assistant).",
+  "author": "URD0TH",
+  "homepage": "https://github.com/URD0TH/yamtrack-mcp",
+  "license": "AGPL-3.0",
+  "skills": [
+    {
+      "name": "yamtrack-mcp",
+      "path": "."
+    }
+  ]
+}
