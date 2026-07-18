@@ -15,34 +15,40 @@ REST API. No Django code required.
 
 ## Install
 
-Distributed via GitHub only (not npmjs.com). Two options:
+Distributed via **GitHub only** — it is **not** published to npmjs.com, so
+`npx yamtrack-mcp` (the public unscoped name) will **not** work. Use one of the
+two methods below.
 
-### 1. Directly from the git repo (no registry, no auth)
+### 1. Directly from the git repo (recommended — no registry, no auth)
+
+Works out of the box, nothing to configure. The `prepare` script compiles
+`src/` to `dist/` on install.
 
 ```bash
-npx github:URD0TH/yamtrack-mcp --help
+npx github:URD0TH/yamtrack-mcp#v0.1.0 --help
 ```
 
-Or add it to a client config with `npx github:URD0TH/yamtrack-mcp`. The
-`prepare` script compiles `src/` to `dist/` on install.
+Use the same command in a client config (see below). This method does **not**
+depend on the CI release or GitHub Packages.
 
-> **Security note:** pin a tag or commit (e.g.
-> `github:URD0TH/yamtrack-mcp#v0.1.0`) rather than the default branch, so a
-> compromised push can't be pulled automatically.
+> **Security note:** pin a tag or commit (`#v0.1.0`) rather than the default
+> branch, so a compromised push can't be pulled automatically.
 
-### 2. From GitHub Packages (scoped registry)
+### 2. From GitHub Packages (scoped registry — requires a token)
 
-Point the `@urd0th` scope at GitHub Packages and authenticate with a GitHub
-token that has `read:packages`:
+The `Publish` workflow pushes `@urd0th/yamtrack-mcp` to GitHub Packages on each
+`v*` tag. **GitHub Packages requires authentication even for public packages**,
+so consumers must configure the `@urd0th` scope and a GitHub token with
+`read:packages` before installing:
 
 ```bash
 echo "@urd0th:registry=https://npm.pkg.github.com" >> ~/.npmrc
 echo "//npm.pkg.github.com/:_authToken=<GITHUB_TOKEN>" >> ~/.npmrc
-npm install @urd0th/yamtrack-mcp
+npx @urd0th/yamtrack-mcp@0.1.0 --help   # or: npm install @urd0th/yamtrack-mcp@0.1.0
 ```
 
-> **Security note:** pin an explicit version (e.g.
-> `@urd0th/yamtrack-mcp@0.1.0`) rather than `@latest`.
+> **Security note:** pin an explicit version (`@0.1.0`) rather than `@latest`.
+> Without the `.npmrc` entries above, `npx @urd0th/yamtrack-mcp` returns 401.
 
 ## Build from source
 
@@ -120,14 +126,18 @@ Enum values: `media_type` ∈ {`tv`, `movie`, `anime`, `manga`, `game`, `book`,
 
 ## Client configuration
 
+Examples use `npx github:...` (install method 1, no registry). To run from a
+local checkout instead, use `"command": "node"` with
+`"args": ["/abs/path/to/yamtrack-mcp/dist/index.js"]`.
+
 ### Claude Desktop (`claude_desktop_config.json`)
 
 ```json
 {
   "mcpServers": {
     "yamtrack": {
-      "command": "node",
-      "args": ["/abs/path/to/yamtrack-mcp/dist/index.js"],
+      "command": "npx",
+      "args": ["github:URD0TH/yamtrack-mcp#v0.1.0"],
       "env": { "YAMTRACK_API_KEY": "<token>" }
     }
   }
@@ -142,8 +152,8 @@ Enum values: `media_type` ∈ {`tv`, `movie`, `anime`, `manga`, `game`, `book`,
     "servers": {
       "yamtrack": {
         "type": "stdio",
-        "command": "node",
-        "args": ["/abs/path/to/yamtrack-mcp/dist/index.js"],
+        "command": "npx",
+        "args": ["github:URD0TH/yamtrack-mcp#v0.1.0"],
         "env": { "YAMTRACK_API_KEY": "<token>" }
       }
     }
