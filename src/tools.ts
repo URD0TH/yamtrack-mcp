@@ -60,6 +60,74 @@ type ToolFn = (
   args: Record<string, unknown>,
 ) => Promise<unknown>;
 
+// ponytail: LLM-response transformers — strip images, providers, frontend-only noise
+
+type Rec = Record<string, unknown>;
+
+function summarizeStatistics(raw: Rec): Rec {
+  const sd = raw.status_distribution as Rec | undefined;
+  const statusSummary: Record<string, number> = {};
+  if (sd?.datasets && Array.isArray(sd.datasets)) {
+    for (const ds of sd.datasets as Array<{ label: string; total: number }>) {
+      statusSummary[ds.label] = ds.total;
+    }
+  }
+  const avg = (raw.score_distribution as Rec)?.average_score;
+  const consumption = ((raw.consumption_stats as Rec[]) ?? []).map(
+    ({ color: _c, ...item }) => item,
+  );
+  return {
+    media_count: raw.media_count,
+    consumption_stats: consumption,
+    score_average: avg,
+    status_summary: statusSummary,
+  };
+}
+
+function summarizeSearchResults(raw: Rec): Rec {
+  const results = (raw.results ?? []) as Array<{ item: Rec; media: unknown }>;
+  return {
+    ...raw,
+    results: results.map(({ item }) => ({
+      title: item.title,
+      media_id: item.media_id,
+      source: item.source,
+      media_type: item.media_type,
+    })),
+  };
+}
+
+function summarizeDetails(raw: Rec): Rec {
+  const meta = (raw.metadata ?? raw) as Rec;
+  const { image: _img, providers: _prov, ...metaRest } = meta;
+
+  const seasons = ((meta.related as Rec | undefined)?.seasons ?? []) as Rec[];
+  const recs = ((meta.related as Rec | undefined)?.recommendations ?? []) as Rec[];
+  const links = (meta.external_links as Rec | undefined) ?? {};
+
+  return {
+    ...metaRest,
+    external_links: links.IMDb ? { IMDb: links.IMDb } : undefined,
+    seasons: seasons.map(({ image: _i, ...s }) => s),
+    recommendations: recs.map(({ image: _i, ...r }) => r),
+  };
+}
+
+function summarizeMediaEntry(entry: Rec): Rec {
+  const { item, ...rest } = entry;
+  const it = (item ?? {}) as Rec;
+  const { image: _img, ...itemRest } = it;
+  return { ...itemRest, ...rest };
+}
+
+function summarizeMediaList(raw: Rec): Rec {
+  const results = (raw.results ?? []) as Rec[];
+  return {
+    ...raw,
+    results: results.map(summarizeMediaEntry),
+  };
+}
+
 function register(
   server: McpServer,
   name: string,
@@ -92,7 +160,7 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       page: z.coerce.number().int().positive().optional().describe("Page number."),
     },
     async (c, a) => {
-      return c.request("GET", "/search/", {
+      const raw = await c.request("GET", "/search/", {
         query: {
           q: a.query,
           media_type: a.media_type,
@@ -100,6 +168,7 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
           page: a.page,
         },
       });
+      return summarizeSearchResults(raw as Rec);
     },
     client,
   );
@@ -119,13 +188,19 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
         .describe("Season number (tv only)."),
     },
     async (c, a) => {
+      let raw: unknown;
       if (a.media_type === "tv" && a.season_number !== undefined) {
-        return c.request(
+        raw = await c.request(
           "GET",
           `/details/${a.source}/tv/${a.media_id}/season/${a.season_number}/`,
         );
+      } else {
+        raw = await c.request(
+          "GET",
+          `/details/${a.source}/${a.media_type}/${a.media_id}/`,
+        );
       }
-      return c.request("GET", `/details/${a.source}/${a.media_type}/${a.media_id}/`);
+      return summarizeDetails(raw as Rec);
     },
     client,
   );
@@ -152,7 +227,7 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       per_page: z.coerce.number().int().positive().optional(),
     },
     async (c, a) => {
-      return c.request("GET", `/media/${a.media_type}/`, {
+      const raw = await c.request("GET", `/media/${a.media_type}/`, {
         query: {
           status: a.status,
           sort: a.sort,
@@ -161,6 +236,7 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
           per_page: a.per_page,
         },
       });
+      return summarizeMediaList(raw as Rec);
     },
     client,
   );
@@ -175,7 +251,21 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
         .optional()
         .describe("upcoming (default), recent, completion, episodes_left, title."),
     },
-    async (c, a) => c.request("GET", "/home/", { query: { sort: a.sort } }),
+    async (c, a) => {
+      const raw = await c.request("GET", "/home/", { query: { sort: a.sort } });
+      const out = { ...(raw as Rec) };
+      for (const key of Object.keys(out)) {
+        const section = out[key] as Rec | undefined;
+        if (!section || typeof section !== "object") continue;
+        for (const sub of Object.keys(section)) {
+          const group = section[sub] as Rec | undefined;
+          if (group?.items && Array.isArray(group.items)) {
+            group.items = group.items.map(summarizeMediaEntry);
+          }
+        }
+      }
+      return out;
+    },
     client,
   );
 
@@ -377,9 +467,10 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       end_date: z.string().optional().describe("End date YYYY-MM-DD or 'all'."),
     },
     async (c, a) => {
-      return c.request("GET", "/statistics/", {
+      const raw = await c.request("GET", "/statistics/", {
         query: { "start-date": a.start_date, "end-date": a.end_date },
       });
+      return summarizeStatistics(raw as Record<string, unknown>);
     },
     client,
   );
@@ -389,7 +480,11 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
     "get_me",
     "Get the currently authenticated user.",
     {},
-    async (c) => c.request("GET", "/auth/me/"),
+    async (c) => {
+      const raw = (await c.request("GET", "/auth/me/")) as Rec;
+      const { token: _t, ...rest } = raw;
+      return rest;
+    },
     client,
   );
 }

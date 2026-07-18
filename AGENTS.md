@@ -18,6 +18,17 @@ instance over HTTP.
 - Entry: `src/index.ts` (`McpServer` + transport selection). Logs to stderr only.
 - `src/client.ts`: `YamtrackClient` — REST wrapper, Bearer auth with the static API key.
 - `src/tools.ts`: tool definitions mapped 1:1 to REST endpoints (zod schemas).
+  Each tool handler applies an LLM-response transformer before returning data,
+  stripping provider-specific noise (images, charts, color fields, API tokens)
+  so the model sees only actionable fields:
+  - `summarizeSearchResults`: extracts title, media_type, source, and IDs.
+  - `summarizeDetails`: strips images, genres boilerplate, credits, charts.
+  - `summarizeMediaEntry` / `summarizeMediaList`: flattens nested entry/list shapes.
+  - `summarizeStatistics`: keeps media_count, consumption_stats (without color),
+    score_average, status_summary; strips activity_data, distributions, and charts.
+  - `get_home` transformer: strips nested section headers by iterating
+    `in_progress.season.items`, `in_progress.movie.items`, etc. two levels deep.
+  - `get_me`: strips the user's API token from the response.
 - Auth: a single static API key via `YAMTRACK_API_KEY`/`--token` (no JWT login or refresh).
 - Transports: `stdio` (default) uses the startup token; `http` (`--transport http`,
   StreamableHTTP stateless on `POST /mcp`) authenticates per connection from the
@@ -38,8 +49,9 @@ instance over HTTP.
 - `npm run verify` runs typecheck (`tsc`), lint+format (`biome check`), and tests (`vitest run`).
 - `npm run build` compiles `src/` to `dist/` under `strict`.
 - Integration tests (`tests/server.test.ts`) drive every tool against an in-process
-  mock REST API over `InMemoryTransport`, covering auth (static API key) and
-  request/response shapes.
+  mock REST API over `InMemoryTransport`, covering auth (static key), request/response
+  shapes, and all transformer output forms. 22 tests total: 13 original tool tests,
+  7 transformer tests, 2 HTTP transport tests.
 - Smoke test: `node dist/index.js --help` and an MCP `initialize` + `tools/list`.
 
 ## Child DOX Index

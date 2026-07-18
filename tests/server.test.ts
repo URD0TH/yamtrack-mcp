@@ -106,6 +106,27 @@ describe("read-only tools", () => {
   afterEach(() => h.stop());
 
   it("search_media hits /search/ without auth", async () => {
+    await h.stop();
+    h = await makeHarness({
+      handler: (req) => ({
+        status: 200,
+        body: {
+          page: 1,
+          results: [
+            {
+              item: {
+                title: "Spider-Man",
+                media_id: 557,
+                source: "tmdb",
+                media_type: "movie",
+                image: "http://x",
+              },
+              media: null,
+            },
+          ],
+        },
+      }),
+    });
     const res = await h.mcp.callTool({
       name: "search_media",
       arguments: { query: "spider", media_type: "movie", source: "tmdb", page: 1 },
@@ -118,7 +139,9 @@ describe("read-only tools", () => {
       page: "1",
     });
     expect(h.mock.requests[0].auth).toBeUndefined();
-    expect(text(res)).toContain("spider");
+    const parsed = JSON.parse(text(res));
+    expect(parsed.results[0].title).toBe("Spider-Man");
+    expect(parsed.results[0]).not.toHaveProperty("image");
   });
 
   it("get_details with season uses the season path", async () => {
@@ -135,11 +158,38 @@ describe("read-only tools", () => {
   });
 
   it("get_details without season uses the item path", async () => {
-    await h.mcp.callTool({
+    await h.stop();
+    h = await makeHarness({
+      handler: () => ({
+        status: 200,
+        body: {
+          metadata: {
+            title: "Stranger Things",
+            image: "http://x",
+            providers: { US: { flatrate: [] } },
+            external_links: {
+              IMDb: "http://imdb.com/x",
+              Wikidata: "http://wikidata.org/x",
+            },
+            related: {
+              seasons: [{ season_number: 1, image: "http://x" }],
+              recommendations: [{ title: "FROM", image: "http://x" }],
+            },
+          },
+        },
+      }),
+    });
+    const res = await h.mcp.callTool({
       name: "get_details",
       arguments: { source: "mal", media_type: "anime", media_id: "9" },
     });
     expect(h.mock.requests[0].path).toBe("/api/details/mal/anime/9/");
+    const parsed = JSON.parse(text(res));
+    expect(parsed).not.toHaveProperty("providers");
+    expect(parsed).not.toHaveProperty("image");
+    expect(parsed.seasons[0]).not.toHaveProperty("image");
+    expect(parsed.recommendations[0]).not.toHaveProperty("image");
+    expect(parsed.external_links.IMDb).toBeDefined();
   });
 });
 
@@ -211,6 +261,282 @@ describe("write tools", () => {
       "start-date": "2024-01-01",
       "end-date": "2024-12-31",
     });
+  });
+});
+
+describe("LLM transformers", () => {
+  it("search_media strips images and media from results", async () => {
+    const h = await makeHarness({
+      handler: () => ({
+        status: 200,
+        body: {
+          page: 1,
+          total_results: 2,
+          results: [
+            {
+              item: {
+                title: "Inception",
+                media_id: 27205,
+                source: "tmdb",
+                media_type: "movie",
+                image: "http://image.tmdb.org/poster.jpg",
+              },
+              media: { something: "extra" },
+            },
+            {
+              item: {
+                title: "Interstellar",
+                media_id: 157336,
+                source: "tmdb",
+                media_type: "movie",
+                image: "http://image.tmdb.org/poster2.jpg",
+              },
+              media: null,
+            },
+          ],
+        },
+      }),
+    });
+    const res = await h.mcp.callTool({
+      name: "search_media",
+      arguments: { query: "nolan", media_type: "movie" },
+    });
+    const parsed = JSON.parse(text(res));
+    expect(parsed.results).toHaveLength(2);
+    for (const r of parsed.results) {
+      expect(r).toHaveProperty("title");
+      expect(r).toHaveProperty("media_id");
+      expect(r).toHaveProperty("source");
+      expect(r).toHaveProperty("media_type");
+      expect(r).not.toHaveProperty("image");
+      expect(r).not.toHaveProperty("media");
+    }
+    expect(parsed.results[0].title).toBe("Inception");
+    await h.stop();
+  });
+
+  it("get_details strips image, providers, and images from seasons/recommendations", async () => {
+    const h = await makeHarness({
+      handler: () => ({
+        status: 200,
+        body: {
+          metadata: {
+            title: "Breaking Bad",
+            image: "http://x/poster.jpg",
+            providers: { US: { flatrate: [] } },
+            external_links: {
+              IMDb: "http://imdb.com/x",
+              Wikidata: "http://wikidata.org/x",
+            },
+            related: {
+              seasons: [
+                { season_number: 1, image: "http://x/s1.jpg" },
+                { season_number: 2, image: "http://x/s2.jpg" },
+              ],
+              recommendations: [
+                { title: "Better Call Saul", image: "http://x/bcs.jpg" },
+              ],
+            },
+          },
+        },
+      }),
+    });
+    const res = await h.mcp.callTool({
+      name: "get_details",
+      arguments: { source: "tmdb", media_type: "tv", media_id: "1396" },
+    });
+    const parsed = JSON.parse(text(res));
+    expect(parsed).not.toHaveProperty("image");
+    expect(parsed).not.toHaveProperty("providers");
+    expect(parsed.title).toBe("Breaking Bad");
+    expect(parsed.seasons).toHaveLength(2);
+    expect(parsed.seasons[0]).not.toHaveProperty("image");
+    expect(parsed.recommendations).toHaveLength(1);
+    expect(parsed.recommendations[0]).not.toHaveProperty("image");
+    expect(parsed.external_links).toEqual({ IMDb: "http://imdb.com/x" });
+    await h.stop();
+  });
+
+  it("list_tracked_media flattens item wrapper and strips images", async () => {
+    const h = await makeHarness({
+      handler: () => ({
+        status: 200,
+        body: {
+          count: 1,
+          results: [
+            {
+              id: 1,
+              item: {
+                id: 2,
+                media_id: "550",
+                source: "tmdb",
+                media_type: "movie",
+                title: "Fight Club",
+                image: "http://x/poster.jpg",
+              },
+              status: "Completed",
+              score: "9.0",
+            },
+          ],
+        },
+      }),
+    });
+    const res = await h.mcp.callTool({
+      name: "list_tracked_media",
+      arguments: { media_type: "movie" },
+    });
+    const parsed = JSON.parse(text(res));
+    const entry = parsed.results[0];
+    expect(entry.title).toBe("Fight Club");
+    expect(entry.media_id).toBe("550");
+    expect(entry.status).toBe("Completed");
+    expect(entry).not.toHaveProperty("image");
+    expect(entry).not.toHaveProperty("item");
+    await h.stop();
+  });
+
+  it("get_home strips images from all section items", async () => {
+    const h = await makeHarness({
+      handler: () => ({
+        status: 200,
+        body: {
+          in_progress: {
+            season: {
+              items: [
+                {
+                  id: 1,
+                  item: {
+                    id: 2,
+                    media_id: "66732",
+                    source: "tmdb",
+                    media_type: "season",
+                    title: "Stranger Things",
+                    image: "http://x/poster.jpg",
+                    season_number: 1,
+                  },
+                  status: "In progress",
+                },
+              ],
+              total: 1,
+            },
+          },
+          planning: {},
+        },
+      }),
+    });
+    const res = await h.mcp.callTool({
+      name: "get_home",
+      arguments: {},
+    });
+    const parsed = JSON.parse(text(res));
+    const entry = parsed.in_progress.season.items[0];
+    expect(entry.title).toBe("Stranger Things");
+    expect(entry).not.toHaveProperty("image");
+    expect(entry).not.toHaveProperty("item");
+    await h.stop();
+  });
+
+  it("get_statistics strips chart noise and keeps aggregates", async () => {
+    const h = await makeHarness({
+      handler: () => ({
+        status: 200,
+        body: {
+          media_count: { total: 5, movie: 3, tv: 2 },
+          media_type_distribution: {
+            labels: ["Movie", "TV"],
+            datasets: [{ data: [3, 2], backgroundColor: ["#f97316", "#10b981"] }],
+          },
+          score_distribution: {
+            labels: ["0", "1", "2"],
+            datasets: [{ label: "Movie", data: [0, 0, 1] }],
+            average_score: 8.5,
+          },
+          status_distribution: {
+            labels: ["Movie", "TV"],
+            datasets: [
+              { label: "Completed", data: [2, 1], total: 3 },
+              { label: "In progress", data: [1, 1], total: 2 },
+            ],
+          },
+          status_pie_chart_data: {
+            labels: ["Completed", "In progress"],
+            datasets: { data: [3, 2] },
+          },
+          consumption_stats: [
+            {
+              media_type: "movie",
+              value: 3,
+              descriptor: "Movies watched",
+              color: "#f97316",
+            },
+          ],
+          activity_data: { some: "chart" },
+        },
+      }),
+    });
+    const res = await h.mcp.callTool({
+      name: "get_statistics",
+      arguments: { start_date: "all", end_date: "all" },
+    });
+    const parsed = JSON.parse(text(res));
+    expect(parsed).toHaveProperty("media_count");
+    expect(parsed.media_count.total).toBe(5);
+    expect(parsed).toHaveProperty("score_average", 8.5);
+    expect(parsed).toHaveProperty("status_summary");
+    expect(parsed.status_summary).toEqual({ Completed: 3, "In progress": 2 });
+    expect(parsed.consumption_stats[0]).not.toHaveProperty("color");
+    expect(parsed).not.toHaveProperty("activity_data");
+    expect(parsed).not.toHaveProperty("media_type_distribution");
+    expect(parsed).not.toHaveProperty("score_distribution");
+    expect(parsed).not.toHaveProperty("status_distribution");
+    expect(parsed).not.toHaveProperty("status_pie_chart_data");
+    await h.stop();
+  });
+
+  it("get_me strips the API token from response", async () => {
+    const h = await makeHarness({
+      handler: () => ({
+        status: 200,
+        body: {
+          id: 1,
+          username: "testapi",
+          email: "",
+          token: "super-secret-key",
+          profile_private: true,
+        },
+      }),
+    });
+    const res = await h.mcp.callTool({ name: "get_me", arguments: {} });
+    const parsed = JSON.parse(text(res));
+    expect(parsed.username).toBe("testapi");
+    expect(parsed).not.toHaveProperty("token");
+    await h.stop();
+  });
+
+  it("get_history returns raw timeline without transformation", async () => {
+    const h = await makeHarness({
+      handler: () => ({
+        status: 200,
+        body: {
+          timeline: [
+            {
+              id: 1,
+              date: "2024-01-01T00:00:00Z",
+              changes: [{ field: "score", new: 9 }],
+            },
+          ],
+          total: 1,
+        },
+      }),
+    });
+    const res = await h.mcp.callTool({
+      name: "get_history",
+      arguments: { source: "tmdb", media_type: "movie", media_id: "550" },
+    });
+    const parsed = JSON.parse(text(res));
+    expect(parsed.timeline).toHaveLength(1);
+    expect(parsed.timeline[0].changes[0].field).toBe("score");
+    await h.stop();
   });
 });
 
