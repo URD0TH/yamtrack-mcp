@@ -60,7 +60,7 @@ type ToolFn = (
   args: Record<string, unknown>,
 ) => Promise<unknown>;
 
-// ponytail: LLM-response transformers — strip images, providers, frontend-only noise
+// LLM-response transformers — strip images, providers, frontend-only noise
 
 type Rec = Record<string, unknown>;
 
