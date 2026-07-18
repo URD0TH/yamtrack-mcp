@@ -3,12 +3,27 @@
   "version": "0.1.0",
   "description": "MCP server (stdio or http) that exposes Yamtrack's REST API as tools for LLMs",
   "license": "AGPL-3.0",
+  "keywords": ["mcp", "modelcontextprotocol", "yamtrack", "media-tracker", "llm", "ai"],
+  "homepage": "https://github.com/URD0TH/yamtrack-mcp#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/URD0TH/yamtrack-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/URD0TH/yamtrack-mcp/issues"
+  },
   "type": "module",
   "main": "dist/index.js",
   "bin": {
     "yamtrack-mcp": "dist/index.js"
   },
-  "files": ["dist", "supervise.sh"],
+  "files": ["dist"],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build",

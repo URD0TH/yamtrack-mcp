@@ -20,6 +20,10 @@ npm install        # install dependencies
 npm run build      # compile src/ -> dist/ (strict TypeScript)
 ```
 
+> **Security note:** when configuring a client, pin an explicit version
+> (e.g. `npx yamtrack-mcp@0.1.0`) rather than `@latest`, so a compromised
+> release can't be pulled automatically.
+
 ## Run
 
 ```bash
@@ -54,6 +58,10 @@ stateless). Each connection authenticates via the `Authorization: Bearer
 <token>` header it receives, falling back to `--token` / `YAMTRACK_API_KEY`
 when the header is absent. The token is then forwarded as a Bearer token to
 the Yamtrack REST API, exactly like the stdio transport.
+
+> **Security note:** the HTTP transport has no built-in TLS or rate limiting.
+> Bind it to `localhost` and expose it only behind a reverse proxy with
+> HTTPS/authentication — never directly to the internet.
 
 ## Tools
 
