@@ -5,17 +5,32 @@ on:
     types: [published]
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm run verify
+
   publish:
+    needs: verify
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org
+          registry-url: https://npm.pkg.github.com
       - run: npm ci
-      - run: npm run verify
-      - run: npm publish --provenance --access public
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

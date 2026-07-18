@@ -1,5 +1,5 @@
 {
-  "name": "yamtrack-mcp",
+  "name": "@urd0th/yamtrack-mcp",
   "version": "0.1.0",
   "description": "MCP server (stdio or http) that exposes Yamtrack's REST API as tools for LLMs",
   "license": "AGPL-3.0",
@@ -22,11 +22,12 @@
     "node": ">=18"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "npm run build",
+    "prepare": "npm run build",
     "start": "node dist/index.js",
     "dev": "tsc -p tsconfig.build.json && node dist/index.js",
     "typecheck": "tsc",

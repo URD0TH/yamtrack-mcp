@@ -13,16 +13,43 @@ REST API. No Django code required.
 - A reachable Yamtrack instance (e.g. `http://localhost:8000` or your hosted URL)
 - An API token **or** a username/password for that instance
 
-## Install & build
+## Install
+
+Distributed via GitHub only (not npmjs.com). Two options:
+
+### 1. Directly from the git repo (no registry, no auth)
+
+```bash
+npx github:URD0TH/yamtrack-mcp --help
+```
+
+Or add it to a client config with `npx github:URD0TH/yamtrack-mcp`. The
+`prepare` script compiles `src/` to `dist/` on install.
+
+> **Security note:** pin a tag or commit (e.g.
+> `github:URD0TH/yamtrack-mcp#v0.1.0`) rather than the default branch, so a
+> compromised push can't be pulled automatically.
+
+### 2. From GitHub Packages (scoped registry)
+
+Point the `@urd0th` scope at GitHub Packages and authenticate with a GitHub
+token that has `read:packages`:
+
+```bash
+echo "@urd0th:registry=https://npm.pkg.github.com" >> ~/.npmrc
+echo "//npm.pkg.github.com/:_authToken=<GITHUB_TOKEN>" >> ~/.npmrc
+npm install @urd0th/yamtrack-mcp
+```
+
+> **Security note:** pin an explicit version (e.g.
+> `@urd0th/yamtrack-mcp@0.1.0`) rather than `@latest`.
+
+## Build from source
 
 ```bash
 npm install        # install dependencies
 npm run build      # compile src/ -> dist/ (strict TypeScript)
 ```
-
-> **Security note:** when configuring a client, pin an explicit version
-> (e.g. `npx yamtrack-mcp@0.1.0`) rather than `@latest`, so a compromised
-> release can't be pulled automatically.
 
 ## Run
 
