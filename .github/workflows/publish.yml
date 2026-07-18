@@ -1,35 +1,86 @@
 name: Publish
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.1.0)"
+        required: true
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       matrix:
         node-version: [18, 24]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
       - run: npm run verify
 
-  publish:
+  release-publish:
     needs: verify
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
-      contents: read
+      contents: write
       packages: write
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ env.TAG }}
+          fetch-depth: 0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24
           registry-url: https://npm.pkg.github.com
+
+      - name: Verify tag matches package.json version
+        run: |
+          pkg="v$(node -p "require('./package.json').version")"
+          if [ "$pkg" != "$TAG" ]; then
+            echo "::error::Tag $TAG does not match package.json version $pkg"
+            exit 1
+          fi
+
+      - name: Build changelog
+        id: changelog
+        run: |
+          prev=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
+          range="${prev:+$prev..}$TAG"
+          repo="${{ github.server_url }}/${{ github.repository }}"
+          {
+            echo "body<<EOF"
+            git log "$range" --no-merges --pretty="- [%s]($repo/commit/%H)"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --notes "${{ steps.changelog.outputs.body }}" \
+            --verify-tag || \
+          gh release edit "$TAG" --notes "${{ steps.changelog.outputs.body }}"
+
       - run: npm ci
       - run: npm publish
         env:
