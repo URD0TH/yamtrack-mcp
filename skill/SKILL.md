@@ -6,7 +6,7 @@ description: |
   Yamtrack through an AI assistant, or to set up / configure the Yamtrack MCP
   server in any client (Claude, Codex, OpenCode, VS Code, Hermes, Google
   Antigravity, Pi, or over HTTP). Trigger on phrases like "track this show in
-  Yamtrack", "add <title> to my list", "what am I watching", "mark episode N",
+  Yamtrack", "add a title to my list", "what am I watching", "mark episode N",
   "update my score", "configure Yamtrack MCP", "connect Yamtrack to Claude/",
   "Codex/OpenCode/Antigravity/Pi", even when the MCP server is not yet
   installed. Covers both using the MCP tools and installing/configuring the

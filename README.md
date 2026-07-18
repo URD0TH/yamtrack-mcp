@@ -84,6 +84,22 @@ The server authenticates to Yamtrack with a Bearer token. Precedence:
 
 Read-only tools (`search_media`, `get_details`) work **without** authentication.
 
+> **One token, two ways to pass it.** There is a **single** credential — your
+> Yamtrack account API key. "Bearer" is just *how* it's sent, not a different
+> token.
+> - **stdio:** set the raw key in `YAMTRACK_API_KEY` (or `--token`). Do **not**
+>   write `Bearer` — the server adds the `Bearer ` prefix for you when it calls
+>   the REST API.
+>   ```json
+>   "env": { "YAMTRACK_API_KEY": "<token>" }
+>   ```
+> - **http:** the client sends `Authorization: Bearer <token>` and the server
+>   forwards that same key. Here you **do** write `Bearer`.
+>   ```json
+>   "headers": { "Authorization": "Bearer <token>" }
+>   ```
+> The `<token>` value is identical in both cases.
+
 ### HTTP transport
 
 With `--transport http` the server listens on `POST /mcp` (StreamableHTTP,

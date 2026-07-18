@@ -34,6 +34,19 @@ Depends on the transport:
 In both cases the server forwards the key as `Authorization: Bearer <key>` to
 the Yamtrack REST API.
 
+> **"Bearer" is how the key is sent, not a separate token.** There is one
+> credential. In **stdio**, put the raw key in `YAMTRACK_API_KEY` / `--token`
+> — do **not** write `Bearer`; the server adds the prefix itself. In **http**,
+> the client sends `Authorization: Bearer <key>` and the server forwards that
+> same value. The `<key>` is identical either way.
+>
+> ```json
+> // stdio config — no "Bearer"
+> "env": { "YAMTRACK_API_KEY": "<token>" }
+> // http config — with "Bearer"
+> "headers": { "Authorization": "Bearer <token>" }
+> ```
+
 ### CLI flags
 
 | Option | Env var | Description |
