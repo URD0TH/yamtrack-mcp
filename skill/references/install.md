@@ -1,13 +1,22 @@
 # Install & Run the MCP Server
 
-Build once on any machine with Node.js 18+ (developed on v22/v26). The server
-talks to a reachable Yamtrack instance over its public REST API.
+Requires Node.js 18+. The server talks to a reachable Yamtrack instance over its
+public REST API. Distributed via GitHub only (not npmjs.com).
+
+**Recommended — run straight from the repo (no registry, no auth):**
+
+```bash
+npx github:URD0TH/yamtrack-mcp#v0.1.0 --help
+```
+
+The `prepare` script compiles `src/` to `dist/` on install. Alternatively, use
+GitHub Packages (`@urd0th/yamtrack-mcp`, requires a GitHub token with
+`read:packages`) or build from a local clone:
 
 ```bash
 git clone https://github.com/URD0TH/yamtrack-mcp
 cd yamtrack-mcp
-npm install        # install dependencies
-npm run build      # compile src/ -> dist/ (strict TypeScript)
+npm install && npm run build
 node dist/index.js --help
 ```
 
@@ -55,8 +64,6 @@ the Yamtrack REST API.
 | `--base-url <url>` | `YAMTRACK_BASE_URL` | API base URL. Default `http://localhost:8000/api` |
 | `--token <token>` | `YAMTRACK_API_KEY` | Static API key (http fallback when no header) |
 | `--port <n>` | – | Port for `http` transport. Default `8080` |
-| `--username <user>` | – | Username (mints a JWT at startup) |
-| `--password <pass>` | – | Password (mints a JWT at startup) |
 | `--help` | – | Show usage |
 
 > `YAMTRACK_BASE_URL` is the Yamtrack REST API (`/api`), **not** the `/mcp`
@@ -64,15 +71,10 @@ the Yamtrack REST API.
 
 ## Keeping it alive
 
-The bundled `supervise.sh` restarts the server if it crashes, up to
-`YAMTRACK_MCP_MAX_RETRIES` attempts (default `5`, `YAMTRACK_MCP_RETRY_INTERVAL`
-seconds between tries, default `2`). Each attempt and the final give-up are
-logged to stderr; after the limit it exits. A clean exit (code `0`) is not
-retried.
-
-```bash
-./supervise.sh --transport http --port 9123 --base-url http://10.0.0.5:8000/api
-```
+For stdio, the MCP client respawns the process on exit. For the `http`
+transport, let your service manager (systemd, Docker `restart:`, pm2) restart
+it. A `supervise.sh` helper that retries on crash is also available in the repo
+for standalone runs.
 
 ## Verify the build
 

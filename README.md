@@ -11,7 +11,7 @@ REST API. No Django code required.
 
 - Node.js 18+ (developed on v22/v26)
 - A reachable Yamtrack instance (e.g. `http://localhost:8000` or your hosted URL)
-- An API token **or** a username/password for that instance
+- An API token for that instance (from Account settings → Integrations)
 
 ## Install
 
@@ -65,12 +65,10 @@ node dist/index.js --help
 
 ## Authentication
 
-The server authenticates to Yamtrack with a Bearer token. Precedence:
-
-1. `--token <token>` / env `YAMTRACK_API_KEY` — a **static account API key**
-   (recommended, never expires) or a JWT.
-2. `--username` + `--password` — mints a JWT at startup and **auto-refreshes**
-   it on 401 (JWTs expire after 1h).
+The server authenticates to Yamtrack with a **single static account API key**
+(from Account settings → Integrations), passed via `--token <token>` or the
+`YAMTRACK_API_KEY` env var. It never expires and is the only credential the
+server accepts.
 
 | Option | Env var | Description |
 |--------|---------|-------------|
@@ -78,8 +76,6 @@ The server authenticates to Yamtrack with a Bearer token. Precedence:
 | `--base-url <url>` | `YAMTRACK_BASE_URL` | API base URL. Default `http://localhost:8000/api` |
 | `--token <token>` | `YAMTRACK_API_KEY` | Static API key (http fallback when no header) |
 | `--port <n>` | – | Port for `http` transport. Default `8080` |
-| `--username <user>` | – | Username (mint JWT at startup) |
-| `--password <pass>` | – | Password (mint JWT at startup) |
 | `--help` | – | Show usage |
 
 Read-only tools (`search_media`, `get_details`) work **without** authentication.
@@ -216,15 +212,10 @@ request/response shapes.
 
 ## Resilience
 
-`supervise.sh` wraps the server and restarts it if it crashes, up to
-`YAMTRACK_MCP_MAX_RETRIES` attempts (default `5`, with a
-`YAMTRACK_MCP_RETRY_INTERVAL` seconds delay, default `2`). Each attempt and the
-final give-up are logged to stderr. After the limit is reached the supervisor
-exits. The server's own clean exit (code `0`) is not retried.
-
-```bash
-./supervise.sh --transport http --port 9123 --base-url http://10.0.0.5:8000/api
-```
+MCP clients (Claude Desktop, OpenCode, etc.) respawn the stdio process on exit,
+and for the `http` transport your service manager (systemd, Docker
+`restart:`, pm2) should handle restarts. A `supervise.sh` helper that retries on
+crash is also available in the repo for standalone runs.
 
 ## Project structure
 
@@ -232,7 +223,7 @@ exits. The server's own clean exit (code `0`) is not retried.
 yamtrack-mcp/
 ├── src/
 │   ├── index.ts     # Entry: transport selection (stdio/http), CLI args
-│   ├── client.ts    # YamtrackClient: REST wrapper, Bearer auth, JWT refresh
+│   ├── client.ts    # YamtrackClient: REST wrapper, Bearer auth
 │   └── tools.ts     # Tool definitions mapped to REST endpoints (zod schemas)
 ├── tests/           # Integration tests with a mock REST API
 ├── biome.json       # Lint + format config

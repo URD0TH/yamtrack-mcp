@@ -9,6 +9,12 @@ form (see the last section).
 Replace `/abs/path/to/yamtrack-mcp/dist/index.js` with the real built path and
 `<your-token>` with your static API key from **Account settings → Integrations**.
 
+> **No local build?** Instead of `"command": "node"` +
+> `"args": ["/abs/.../dist/index.js"]`, run straight from GitHub with
+> `"command": "npx"` + `"args": ["github:URD0TH/yamtrack-mcp#v0.1.0"]` (same
+> `env`). This needs no clone or build. The examples below use the local-path
+> form; swap in the `npx` form anywhere.
+
 ## Claude Desktop
 
 File: `claude_desktop_config.json` (macOS

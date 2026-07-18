@@ -31,7 +31,7 @@ disagrees with those, trust the wiki and `README.md`.
   (one section per client: Claude, Codex, OpenCode, VS Code, Hermes,
   Google Antigravity, Pi, and generic HTTP).
 - **Before running the server / issuing auth** → `references/install.md`
-  (build, run, API-key auth, `supervise.sh` resilience).
+  (install via npx github / GitHub Packages, run, API-key auth).
 - **Choosing how to call a tool / what fields exist** → `references/tools.md`
   (all 15 tools mapped 1:1 to REST endpoints, plus the enums).
 - **Deciding stdio vs http, or running a workflow** → `references/usage.md`

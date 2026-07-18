@@ -19,7 +19,7 @@ skill/
 ├── README.md         # this file
 ├── references/
 │   ├── tools.md      # 15 MCP tools mapped 1:1 to REST endpoints + enums
-│   ├── install.md    # build, run, API-key auth, supervise.sh
+│   ├── install.md    # install (npx github / GitHub Packages), run, API-key auth
 │   ├── clients.md    # setup for each client (Claude, Codex, OpenCode, VS Code,
 │   │                 #   Hermes, Antigravity, Pi, generic HTTP)
 │   └── usage.md      # stdio vs http, the two-ports gotcha, canned workflows
