@@ -2,6 +2,7 @@
   "name": "yamtrack-mcp",
   "version": "0.1.0",
   "description": "MCP server (stdio or http) that exposes Yamtrack's REST API as tools for LLMs",
+  "license": "AGPL-3.0",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
