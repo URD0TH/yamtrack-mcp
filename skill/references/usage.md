@@ -63,6 +63,7 @@ These are the canned flows the skill enables. Tool names are exact; see
   `end_date` (re-send with `end_date` to correct the watch date).
 - Generic bump: `update_progress` with `operation` `increase`/`decrease`.
 - Rating: `update_score` (0–10).
+- Fresh data: `sync_metadata` to refresh item details from the provider when they seem outdated.
 
 ### Batch statistics
 
