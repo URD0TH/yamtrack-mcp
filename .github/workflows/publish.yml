@@ -1,11 +1,6 @@
 name: Publish
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: "Tag to release (e.g. v0.1.0)"
-        required: true
   push:
     tags:
       - "v*"
@@ -19,18 +14,8 @@ concurrency:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    strategy:
-      matrix:
-        node-version: [18, 24]
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
-        with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm ci
-      - run: npm run verify
+    uses: ./.github/workflows/verify.yml
+    secrets: inherit
 
   release-publish:
     needs: verify
@@ -39,17 +24,21 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
+      attestations: write
     env:
-      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      TAG: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ env.TAG }}
           fetch-depth: 0
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           registry-url: https://npm.pkg.github.com
+          cache: "npm"
 
       - name: Verify tag matches package.json version
         run: |
@@ -59,6 +48,11 @@ jobs:
             exit 1
           fi
 
+      - name: Install and build
+        run: |
+          npm ci
+          npm run build
+
       - name: Build changelog
         id: changelog
         run: |
@@ -67,7 +61,7 @@ jobs:
           repo="${{ github.server_url }}/${{ github.repository }}"
           {
             echo "body<<EOF"
-            git log "$range" --no-merges --pretty="- [%s]($repo/commit/%H)"
+            git log "$range" --no-merges --pretty="- [%h]($repo/commit/%H) %s"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
@@ -81,7 +75,15 @@ jobs:
             --verify-tag || \
           gh release edit "$TAG" --notes "${{ steps.changelog.outputs.body }}"
 
-      - run: npm ci
-      - run: npm publish
+      - name: Pack and publish package to GitHub Packages
+        run: |
+          npm pack
+          npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate build provenance attestation
+        # ponytail: GPR does not consume npm --provenance; use GitHub Artifact Attestations on the tarball
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        with:
+          subject-path: "*.tgz"
