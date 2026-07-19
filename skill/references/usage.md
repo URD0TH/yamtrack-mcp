@@ -41,27 +41,9 @@ yamtrack-mcp --transport http --port 9123 --base-url http://yamtrack.local:8000/
 
 ## Remote host setup
 
-When the MCP server runs on a **different machine** than the client:
-
-**Server (on remote host):**
-```bash
-yamtrack-mcp --transport http --port 9123 --base-url http://localhost:8000/api
-```
-
-**Client (on your local machine):**
-```json
-{
-  "mcpServers": {
-    "yamtrack": {
-      "url": "http://yamtrack-server:9123/mcp",
-      "headers": { "Authorization": "Bearer <your-token>" }
-    }
-  }
-}
-```
-
-Replace `yamtrack-server` with the remote host's IP or hostname. The `--base-url`
-points to Yamtrack on the remote machine (not your local machine).
+When the MCP server runs on a **different machine** than the client, use HTTP
+transport. See `references/clients.md` → HTTP transport section for the full client
+configuration and the two-ports gotcha.
 
 ## Workflows
 
@@ -96,4 +78,4 @@ These are the canned flows the skill enables. Tool names are exact; see
 - "Mark episode 4 of season 2 of Breaking Bad as watched yesterday."
 - "Give me my reading stats for 2025."
 - "Set my score for Final Fantasy VII to 9."
-- "Configure Yamtrack MCP in Codex." (→ see `clients.md`)
+- "Configure Yamtrack MCP in Codex." (→ see `references/clients.md`)

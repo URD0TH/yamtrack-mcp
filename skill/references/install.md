@@ -114,7 +114,7 @@ the Yamtrack REST API.
 | `--help` | – | Show usage |
 
 > `YAMTRACK_BASE_URL` is the Yamtrack REST API (`/api`), **not** the `/mcp`
-> endpoint (see `usage.md` for the two-ports gotcha).
+> endpoint (see `references/usage.md` for the two-ports gotcha).
 
 ## Keeping it alive
 

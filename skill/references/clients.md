@@ -173,4 +173,4 @@ the `url` form above.
 
 > For HTTP, the assistant connects to the MCP server's port (`--port`/`/mcp`).
 > The server itself connects to Yamtrack's REST API port (`--base-url`/`/api`).
-> These are two different addresses — see `usage.md`.
+> These are two different addresses — see `references/usage.md`.

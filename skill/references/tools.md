@@ -52,6 +52,6 @@ Use these exact string values; the server rejects anything else.
 
 - `search_media` and `get_details` work **without** authentication.
 - Every other tool needs the static API key forwarded as
-  `Authorization: Bearer <key>` (see `install.md`).
+  `Authorization: Bearer <key>` (see `references/install.md`).
 - For TV/anime progress, prefer `create_episode` (records the watch date) over
   raw `update_progress` when you want accurate history.
