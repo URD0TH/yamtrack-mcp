@@ -16,25 +16,34 @@ REST API. No Django code required.
 ## Install
 
 Distributed via **GitHub only** — it is **not** published to npmjs.com, so
-`npx yamtrack-mcp` (the public unscoped name) will **not** work. Use one of the
-two methods below.
+`npx yamtrack-mcp` (the public unscoped name) will **not** work. Choose one of
+the three methods below.
 
-### 1. Directly from the git repo (recommended — no registry, no auth)
+### 1. Global install from git (recommended — no registry, no auth)
 
-Works out of the box, nothing to configure. The `prepare` script compiles
-`src/` to `dist/` on install.
+Installs the binary once in your PATH. Compiles TypeScript on install, then
+runs instantly on every launch. No token required.
 
 ```bash
-npx github:URD0TH/yamtrack-mcp#v0.1.0 --help
+npm install -g github:URD0TH/yamtrack-mcp
 ```
 
-Use the same command in a client config (see below). This method does **not**
-depend on the CI release or GitHub Packages.
+After this, the `yamtrack-mcp` command is available everywhere.
 
-> **Security note:** pin a tag or commit (`#v0.1.0`) rather than the default
-> branch, so a compromised push can't be pulled automatically.
+> **Security note:** pin a tag or commit (`github:URD0TH/yamtrack-mcp#v0.1.0`)
+> rather than the default branch, so a compromised push can't be pulled
+> automatically.
 
-### 2. From GitHub Packages (scoped registry — requires a token)
+### 2. npx (no install — good for testing)
+
+Runs the package on the fly without installing. Compiles TypeScript on every
+launch (slower startup). No token required.
+
+```bash
+npx github:URD0TH/yamtrack-mcp
+```
+
+### 3. GitHub Packages (scoped registry — requires a token)
 
 The `Publish` workflow pushes `@urd0th/yamtrack-mcp` to GitHub Packages on each
 `v*` tag. **GitHub Packages requires authentication even for public packages**,
@@ -44,23 +53,43 @@ so consumers must configure the `@urd0th` scope and a GitHub token with
 ```bash
 echo "@urd0th:registry=https://npm.pkg.github.com" >> ~/.npmrc
 echo "//npm.pkg.github.com/:_authToken=<GITHUB_TOKEN>" >> ~/.npmrc
-npx @urd0th/yamtrack-mcp@0.1.0 --help   # or: npm install @urd0th/yamtrack-mcp@0.1.0
+npm install -g @urd0th/yamtrack-mcp        # latest
+npm install -g @urd0th/yamtrack-mcp@0.1.0  # specific version
 ```
 
 > **Security note:** pin an explicit version (`@0.1.0`) rather than `@latest`.
-> Without the `.npmrc` entries above, `npx @urd0th/yamtrack-mcp` returns 401.
+> Without the `.npmrc` entries above, `npm install -g @urd0th/yamtrack-mcp`
+> returns 401.
 
 ## Build from source
 
 ```bash
+git clone https://github.com/URD0TH/yamtrack-mcp
+cd yamtrack-mcp
 npm install        # install dependencies
 npm run build      # compile src/ -> dist/ (strict TypeScript)
 ```
 
 ## Run
 
+After installing globally (method 1):
+
 ```bash
-node dist/index.js --help
+yamtrack-mcp --transport stdio   # default, for local stdio clients
+yamtrack-mcp --transport http    # starts HTTP server on :8080/mcp
+yamtrack-mcp --help              # show all options
+```
+
+With npx (method 2, no install):
+
+```bash
+npx github:URD0TH/yamtrack-mcp --transport http
+```
+
+From source build (Build from source section):
+
+```bash
+node dist/index.js --transport http
 ```
 
 ## Authentication
@@ -138,9 +167,9 @@ Enum values: `media_type` ∈ {`tv`, `movie`, `anime`, `manga`, `game`, `book`,
 
 ## Client configuration
 
-Examples use `npx github:...` (install method 1, no registry). To run from a
-local checkout instead, use `"command": "node"` with
-`"args": ["/abs/path/to/yamtrack-mcp/dist/index.js"]`.
+If you installed globally (Install method 1), use `"command": "yamtrack-mcp"`.
+If you prefer npx (Install method 2), use `"command": "npx"` with
+`"args": ["github:URD0TH/yamtrack-mcp"]`.
 
 ### Claude Desktop (`claude_desktop_config.json`)
 
@@ -148,8 +177,7 @@ local checkout instead, use `"command": "node"` with
 {
   "mcpServers": {
     "yamtrack": {
-      "command": "npx",
-      "args": ["github:URD0TH/yamtrack-mcp#v0.1.0"],
+      "command": "yamtrack-mcp",
       "env": { "YAMTRACK_API_KEY": "<token>" }
     }
   }
@@ -164,8 +192,7 @@ local checkout instead, use `"command": "node"` with
     "servers": {
       "yamtrack": {
         "type": "stdio",
-        "command": "npx",
-        "args": ["github:URD0TH/yamtrack-mcp#v0.1.0"],
+        "command": "yamtrack-mcp",
         "env": { "YAMTRACK_API_KEY": "<token>" }
       }
     }
@@ -175,9 +202,17 @@ local checkout instead, use `"command": "node"` with
 
 ### VS Code (`.vscode/mcp.json`) / Hermes (`~/.hermes/config.yaml`)
 
-Same `command`/`args` shape; pass the token via the `YAMTRACK_API_KEY` env var.
+Same `command` shape; pass the token via the `YAMTRACK_API_KEY` env var.
 
 ### HTTP transport (any client that supports `url` + `headers`)
+
+Start the server:
+
+```bash
+yamtrack-mcp --transport http --port 8080
+```
+
+Then configure the client:
 
 ```json
 {
@@ -190,9 +225,8 @@ Same `command`/`args` shape; pass the token via the `YAMTRACK_API_KEY` env var.
 }
 ```
 
-Run the server with `node dist/index.js --transport http` (optionally
-`--port <n>`). This mirrors how other HTTP MCP servers (e.g. Simkl) are
-configured.
+See the [wiki MCP](https://github.com/URD0TH/Yamtrack/wiki/MCP) for detailed
+configuration examples for each client.
 
 ## Development
 
