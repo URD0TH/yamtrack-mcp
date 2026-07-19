@@ -36,7 +36,7 @@ different addresses that are easy to confuse:
 Example — Yamtrack on `8000`, MCP server on `9123`:
 
 ```bash
-yamtrack-mcp --transport http --port 9123 --base-url http://10.0.0.5:8000/api
+yamtrack-mcp --transport http --port 9123 --base-url http://yamtrack.local:8000/api
 ```
 
 The `/mcp` endpoint is provided **only** by this standalone server; Yamtrack
