@@ -15,7 +15,7 @@ tool names and enum values below — the server validates against them.
 
 | Tool | Parameters | Description |
 |------|-----------|-------------|
-| `list_tracked_media` | `media_type`, `status`, `sort`, `search` | List the user's tracked media |
+| `list_tracked_media` | `media_type`, `status`, `sort`, `search`, `page`, `per_page` | List the user's tracked media |
 | `get_home` | `sort` | Dashboard with in-progress and planning items |
 | `get_history` | `source`, `media_type`, `media_id`, `season_number`, `episode_number` | Change history for an item |
 | `get_me` | – | Current authenticated user |
@@ -25,12 +25,13 @@ tool names and enum values below — the server validates against them.
 | Tool | Parameters | Description |
 |------|-----------|-------------|
 | `create_entry` | `media_id`, `source`, `media_type`, `status`, `score`, `progress`, `notes`, `start_date`, `end_date` | Start tracking new media from a provider |
-| `manual_create` | `media_type`, `title`, `status`, `progress`, `score` | Create a custom/manual entry (no provider) |
+| `manual_create` | `media_type`, `title`, `status`, `progress` | Create a custom/manual entry (no provider) |
 | `update_entry` | `media_type`, `instance_id`, `status`, `score`, `progress`, `notes`, `start_date`, `end_date` | Update a tracked item |
 | `update_progress` | `media_type`, `instance_id`, `operation` | Increase or decrease progress |
 | `update_score` | `media_type`, `instance_id`, `score` | Update score (0–10) |
 | `delete_entry` | `media_type`, `instance_id` | Stop tracking an item |
 | `create_episode` | `media_id`, `source`, `season_number`, `episode_number`, `end_date` | Mark an episode watched (re-send with `end_date` to correct the watch date) |
+| `sync_metadata` | `source`, `media_type`, `media_id` | Re-sync metadata from its provider |
 
 ## Statistics
 
