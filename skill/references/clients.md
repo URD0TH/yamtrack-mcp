@@ -1,19 +1,17 @@
 # Client Configuration
 
 The server speaks **stdio** by default, so most clients just need a
-`command`/`args` block pointing at the built `dist/index.js`, plus the token via
+`command` block pointing at the installed binary, plus the token via
 `YAMTRACK_API_KEY` and the instance URL via `YAMTRACK_BASE_URL` (default
 `http://localhost:8000/api`). For remote/HTTP clients use the `url` + `headers`
 form (see the last section).
 
-Replace `/abs/path/to/yamtrack-mcp/dist/index.js` with the real built path and
-`<your-token>` with your static API key from **Account settings → Integrations**.
+If you installed globally (`npm install -g github:URD0TH/yamtrack-mcp`), use
+`"command": "yamtrack-mcp"`. If you prefer npx, use `"command": "npx"` with
+`"args": ["github:URD0TH/yamtrack-mcp"]`.
 
-> **No local build?** Instead of `"command": "node"` +
-> `"args": ["/abs/.../dist/index.js"]`, run straight from GitHub with
-> `"command": "npx"` + `"args": ["github:URD0TH/yamtrack-mcp#v0.1.0"]` (same
-> `env`). This needs no clone or build. The examples below use the local-path
-> form; swap in the `npx` form anywhere.
+Replace `<your-token>` with your static API key from **Account settings →
+Integrations**.
 
 ## Claude Desktop
 
@@ -25,8 +23,7 @@ File: `claude_desktop_config.json` (macOS
 {
   "mcpServers": {
     "yamtrack": {
-      "command": "node",
-      "args": ["/abs/path/to/yamtrack-mcp/dist/index.js"],
+      "command": "yamtrack-mcp",
       "env": {
         "YAMTRACK_API_KEY": "<your-token>",
         "YAMTRACK_BASE_URL": "https://your-yamtrack-instance.com/api"
@@ -44,15 +41,14 @@ remote HTTP), so use the stdio form below.
 
 ```toml
 [mcp_servers.yamtrack]
-command = "node"
-args = ["/abs/path/to/yamtrack-mcp/dist/index.js"]
+command = "yamtrack-mcp"
 env = { YAMTRACK_API_KEY = "<your-token>", YAMTRACK_BASE_URL = "https://your-yamtrack-instance.com/api" }
 ```
 
 Equivalent CLI (persists to the same `config.toml`):
 
 ```bash
-codex mcp add yamtrack -- node /abs/path/to/yamtrack-mcp/dist/index.js
+codex mcp add yamtrack -- yamtrack-mcp
 ```
 
 Then export the env vars in your shell, or add them to the TOML `env` block as
@@ -70,8 +66,7 @@ under `mcp.servers`.
     "servers": {
       "yamtrack": {
         "type": "stdio",
-        "command": "node",
-        "args": ["/abs/path/to/yamtrack-mcp/dist/index.js"],
+        "command": "yamtrack-mcp",
         "enabled": true,
         "env": {
           "YAMTRACK_API_KEY": "<your-token>",
@@ -93,8 +88,7 @@ shape; pass the token via `YAMTRACK_API_KEY`.
   "servers": {
     "yamtrack": {
       "type": "stdio",
-      "command": "node",
-      "args": ["/abs/path/to/yamtrack-mcp/dist/index.js"],
+      "command": "yamtrack-mcp",
       "env": {
         "YAMTRACK_API_KEY": "<your-token>",
         "YAMTRACK_BASE_URL": "https://your-yamtrack-instance.com/api"
@@ -120,8 +114,7 @@ Antigravity (IDE and CLI) reads MCP config as JSON with the `mcpServers` key.
 {
   "mcpServers": {
     "yamtrack": {
-      "command": "node",
-      "args": ["/abs/path/to/yamtrack-mcp/dist/index.js"],
+      "command": "yamtrack-mcp",
       "env": {
         "YAMTRACK_API_KEY": "<your-token>",
         "YAMTRACK_BASE_URL": "https://your-yamtrack-instance.com/api"
@@ -145,8 +138,7 @@ Pi reads MCP config as JSON with the `mcpServers` key.
 {
   "mcpServers": {
     "yamtrack": {
-      "command": "node",
-      "args": ["/abs/path/to/yamtrack-mcp/dist/index.js"],
+      "command": "yamtrack-mcp",
       "env": {
         "YAMTRACK_API_KEY": "<your-token>",
         "YAMTRACK_BASE_URL": "https://your-yamtrack-instance.com/api"
@@ -158,7 +150,7 @@ Pi reads MCP config as JSON with the `mcpServers` key.
 
 ## HTTP transport (any client that supports `url` + `headers`)
 
-Run the server with `node dist/index.js --transport http` (optionally
+Run the server with `yamtrack-mcp --transport http` (optionally
 `--port <n>`, default `8080`). It listens on `POST /mcp` (StreamableHTTP,
 stateless) and authenticates each connection via the
 `Authorization: Bearer <key>` header. This works for any client that connects to

@@ -2,7 +2,7 @@
 
 ## Transports: stdio vs http
 
-- **stdio** (default): the client launches `node dist/index.js` as a subprocess
+- **stdio** (default): the client launches `yamtrack-mcp` as a subprocess
   and talks over stdin/stdout. Pass the token via `--token` /
   `YAMTRACK_API_KEY` and the instance via `--base-url` / `YAMTRACK_BASE_URL`.
   Use this for local, single-client setups (Claude Desktop, Codex, OpenCode,
@@ -12,6 +12,10 @@
   `Authorization: Bearer <key>` header it receives, falling back to
   `--token` / `YAMTRACK_API_KEY` when the header is absent. Use this for remote
   instances or multiple clients sharing one server.
+
+> **Remote host?** Always use HTTP transport. The client connects to
+> `http://<host>:<port>/mcp` with `headers: { "Authorization": "Bearer <token>" }`.
+> The server runs on the remote host with `yamtrack-mcp --transport http --port <n>`.
 
 ## Two ports, two endpoints — do not swap them
 
@@ -32,7 +36,7 @@ different addresses that are easy to confuse:
 Example — Yamtrack on `8000`, MCP server on `9123`:
 
 ```bash
-node dist/index.js --transport http --port 9123 --base-url http://10.0.0.5:8000/api
+yamtrack-mcp --transport http --port 9123 --base-url http://10.0.0.5:8000/api
 ```
 
 The `/mcp` endpoint is provided **only** by this standalone server; Yamtrack

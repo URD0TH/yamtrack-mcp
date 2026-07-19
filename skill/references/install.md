@@ -3,21 +3,68 @@
 Requires Node.js 18+. The server talks to a reachable Yamtrack instance over its
 public REST API. Distributed via GitHub only (not npmjs.com).
 
-**Recommended — run straight from the repo (no registry, no auth):**
+## 1. Global install from git (recommended — no registry, no auth)
+
+Installs the binary once in your PATH. Compiles TypeScript on install, then
+runs instantly on every launch. No token required.
 
 ```bash
-npx github:URD0TH/yamtrack-mcp#v0.1.0 --help
+npm install -g github:URD0TH/yamtrack-mcp
 ```
 
-The `prepare` script compiles `src/` to `dist/` on install. Alternatively, use
-GitHub Packages (`@urd0th/yamtrack-mcp`, requires a GitHub token with
-`read:packages`) or build from a local clone:
+After this, the `yamtrack-mcp` command is available everywhere.
+
+> **Security note:** pin a tag or commit (`github:URD0TH/yamtrack-mcp#v0.1.0`)
+> rather than the default branch, so a compromised push can't be pulled
+> automatically.
+
+## 2. npx (no install — good for testing)
+
+Runs the package on the fly without installing. Compiles TypeScript on every
+launch (slower startup). No token required.
+
+```bash
+npx github:URD0TH/yamtrack-mcp
+```
+
+## 3. GitHub Packages (scoped registry — requires a token)
+
+```bash
+echo "@urd0th:registry=https://npm.pkg.github.com" >> ~/.npmrc
+echo "//npm.pkg.github.com/:_authToken=<GITHUB_TOKEN>" >> ~/.npmrc
+npm install -g @urd0th/yamtrack-mcp        # latest
+npm install -g @urd0th/yamtrack-mcp@0.1.0  # specific version
+```
+
+## Build from source
 
 ```bash
 git clone https://github.com/URD0TH/yamtrack-mcp
 cd yamtrack-mcp
 npm install && npm run build
 node dist/index.js --help
+```
+
+## Run
+
+After installing globally (method 1):
+
+```bash
+yamtrack-mcp --transport stdio   # default, for local stdio clients
+yamtrack-mcp --transport http    # starts HTTP server on :8080/mcp
+yamtrack-mcp --help              # show all options
+```
+
+With npx (method 2, no install):
+
+```bash
+npx github:URD0TH/yamtrack-mcp --transport http
+```
+
+From source build (Build from source section):
+
+```bash
+node dist/index.js --transport http
 ```
 
 ## Authentication
