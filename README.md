@@ -222,7 +222,7 @@ Same `command` shape; pass the token via the `YAMTRACK_API_KEY` env var.
 Start the server:
 
 ```bash
-yamtrack-mcp --transport http --port 8080
+yamtrack-mcp serve --port 8080 --base-url http://url:port/api
 ```
 
 Then configure the client:

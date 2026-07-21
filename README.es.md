@@ -1,6 +1,6 @@
 # yamtrack-mcp
 
-[![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](https://github.com/URD0TH/yamtrack-mcp/security/policy)
+![Security Policy](https://img.shields.io/badge/Security-Policy-blue)
 
 [Read in English](README.md)
 
@@ -89,7 +89,7 @@ yamtrack-mcp serve:logs                        # rutas de logs
 yamtrack-mcp --help                            # mostrar todas las opciones
 ```
 
-> **`serve` vs sin `serve`:** Sin `serve` el proceso corre en primer plano —
+> `**serve` vs sin `serve`:** Sin `serve` el proceso corre en primer plano —
 > usalo para desarrollo, testing, o con tu propio supervisor (systemd, Docker
 > `restart:`). Con `serve` el proceso se daemoniza via PM2 con autoreinicio y
 > gestión de logs (no requiere instalación separada de PM2).
@@ -113,37 +113,40 @@ El servidor se autentica en Yamtrack con una **única clave de API estática**
 la variable de entorno `YAMTRACK_API_KEY`. Nunca expira y es la única
 credencial que el servidor acepta.
 
-| Opción | Variable de entorno | Descripción |
-|--------|---------------------|-------------|
-| `--transport <type>` | – | `stdio` (por defecto) o `http` |
-| `--base-url <url>` | `YAMTRACK_BASE_URL` | URL base de la API. Por defecto `http://localhost:8000/api` |
-| `--token <token>` | `YAMTRACK_API_KEY` | Clave de API estática (fallback http cuando no hay header) |
-| `--port <n>` | – | Puerto para transporte `http`. Por defecto `8080` |
-| `--help` | – | Mostrar ayuda |
+
+| Opción               | Variable de entorno | Descripción                                                 |
+| -------------------- | ------------------- | ----------------------------------------------------------- |
+| `--transport <type>` | –                   | `stdio` (por defecto) o `http`                              |
+| `--base-url <url>`   | `YAMTRACK_BASE_URL` | URL base de la API. Por defecto `http://localhost:8000/api` |
+| `--token <token>`    | `YAMTRACK_API_KEY`  | Clave de API estática (fallback http cuando no hay header)  |
+| `--port <n>`         | –                   | Puerto para transporte `http`. Por defecto `8080`           |
+| `--help`             | –                   | Mostrar ayuda                                               |
+
 
 Las herramientas de solo lectura (`search_media`, `get_details`) funcionan
 **sin** autenticación.
 
 > **Un token, dos formas de pasarlo.** Hay una **única** credencial — tu clave
 > de API de Yamtrack. "Bearer" es solo *cómo* se envía, no un token diferente.
+>
 > - **stdio:** poné la clave directamente en `YAMTRACK_API_KEY` (o `--token`).
->   No escribas `Bearer` — el servidor agrega el prefijo `Bearer ` cuando llama
->   a la API REST.
+> No escribas `Bearer` — el servidor agrega el prefijo `Bearer`  cuando llama
+> a la API REST.
 >   ```json
 >   "env": { "YAMTRACK_API_KEY": "<token>" }
 >   ```
 > - **http:** el cliente envía `Authorization: Bearer <token>` y el servidor
->   reenvía esa misma clave. Acá **sí** se escribe `Bearer`.
+> reenvía esa misma clave. Acá **sí** se escribe `Bearer`.
 >   ```json
 >   "headers": { "Authorization": "Bearer <token>" }
 >   ```
+>
 > El valor de `<token>` es idéntico en ambos casos.
 
 ### Transporte HTTP
 
 Con `--transport http` el servidor escucha en `POST /mcp` (StreamableHTTP,
-sin estado). Cada conexión se autentica mediante el header `Authorization:
-Bearer <token>` que recibe, con fallback a `--token` / `YAMTRACK_API_KEY`
+sin estado). Cada conexión se autentica mediante el header `Authorization: Bearer <token>` que recibe, con fallback a `--token` / `YAMTRACK_API_KEY`
 cuando el header está ausente. Luego el token se reenvía como Bearer a la
 API REST de Yamtrack, exactamente como en el transporte stdio.
 
@@ -156,23 +159,25 @@ API REST de Yamtrack, exactamente como en el transporte stdio.
 Todas las herramientas mapean 1:1 a la API REST documentada en
 [wiki/API.md](https://github.com/FuzzyGrim/Yamtrack/wiki/API).
 
-| Herramienta | Endpoint REST |
-|-------------|---------------|
-| `search_media` | `GET /search/` |
-| `get_details` | `GET /details/<source>/<type>/<id>/` (+ season) |
-| `list_tracked_media` | `GET /media/<type>/` |
-| `get_home` | `GET /home/` |
-| `get_history` | `GET /history/<source>/<type>/<id>/` |
-| `create_entry` | `POST /media/<type>/create/` |
-| `manual_create` | `POST /media/manual/create/` |
-| `update_entry` | `PATCH /media/<type>/<instance_id>/` |
-| `update_progress` | `POST /media/<type>/<instance_id>/progress/` |
-| `update_score` | `POST /media/<type>/<instance_id>/score/` |
-| `delete_entry` | `DELETE /media/<type>/<instance_id>/delete/` |
-| `sync_metadata` | `POST /sync/<source>/<type>/<id>/` |
-| `create_episode` | `POST /episodes/` |
-| `get_statistics` | `GET /statistics/` |
-| `get_me` | `GET /auth/me/` |
+
+| Herramienta          | Endpoint REST                                   |
+| -------------------- | ----------------------------------------------- |
+| `search_media`       | `GET /search/`                                  |
+| `get_details`        | `GET /details/<source>/<type>/<id>/` (+ season) |
+| `list_tracked_media` | `GET /media/<type>/`                            |
+| `get_home`           | `GET /home/`                                    |
+| `get_history`        | `GET /history/<source>/<type>/<id>/`            |
+| `create_entry`       | `POST /media/<type>/create/`                    |
+| `manual_create`      | `POST /media/manual/create/`                    |
+| `update_entry`       | `PATCH /media/<type>/<instance_id>/`            |
+| `update_progress`    | `POST /media/<type>/<instance_id>/progress/`    |
+| `update_score`       | `POST /media/<type>/<instance_id>/score/`       |
+| `delete_entry`       | `DELETE /media/<type>/<instance_id>/delete/`    |
+| `sync_metadata`      | `POST /sync/<source>/<type>/<id>/`              |
+| `create_episode`     | `POST /episodes/`                               |
+| `get_statistics`     | `GET /statistics/`                              |
+| `get_me`             | `GET /auth/me/`                                 |
+
 
 Valores de enum: `media_type` ∈ {`tv`, `movie`, `anime`, `manga`, `game`,
 `book`, `comic`, `boardgame`, `season`}, `status` ∈ {`Completed`,
@@ -224,7 +229,7 @@ Misma estructura `command`; pasá el token mediante la variable de entorno
 Iniciá el servidor:
 
 ```bash
-yamtrack-mcp --transport http --port 8080
+yamtrack-mcp serve --port 8080 --base-url http://url:port/api
 ```
 
 Luego configurá el cliente:
@@ -287,7 +292,7 @@ yamtrack-mcp/
 
 ### `npm install -g github:URD0TH/yamtrack-mcp` no funciona
 
-Ese comando crea un enlace simbólico en node\_modules global apuntando a un
+Ese comando crea un enlace simbólico en nodemodules global apuntando a un
 directorio temporal de npm que se elimina al terminar la instalación,
 dejando el binario inservible. Es un problema conocido de `npm install -g`
 con dependencias git.
