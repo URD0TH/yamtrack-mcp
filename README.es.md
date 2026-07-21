@@ -79,7 +79,8 @@ Después de instalar globalmente (método 1 o 2):
 ```bash
 yamtrack-mcp --transport http --port 8080                                # primer plano (dev / testing)
 yamtrack-mcp --transport http --port 8080 --base-url http://url:port/api # primer plano, instancia personalizada
-yamtrack-mcp serve --port 9123                 # daemonizado vía PM2 (producción)
+yamtrack-mcp serve --port 9123                                              # daemonizado vía PM2 (producción)
+yamtrack-mcp serve --port 9123 --base-url http://url:port/api              # daemonizado, instancia personalizada
 yamtrack-mcp --transport stdio                 # por defecto, para clientes stdio locales
 yamtrack-mcp serve:status                      # ver estado del servidor
 yamtrack-mcp serve:restart                     # reiniciar
