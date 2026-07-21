@@ -27,11 +27,11 @@ async function makeHarness(clientOpts: {
     token: clientOpts.token,
   });
 
-  const server = new McpServer({ name: "yamtrack", version: "0.1.1" });
+  const server = new McpServer({ name: "yamtrack", version: "0.1.2" });
   registerTools(server, client);
 
   const [clientT, serverT] = InMemoryTransport.createLinkedPair();
-  const mcp = new Client({ name: "test", version: "0.1.1" });
+  const mcp = new Client({ name: "test", version: "0.1.2" });
   await server.connect(serverT);
   await mcp.connect(clientT);
 
