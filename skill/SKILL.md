@@ -25,17 +25,23 @@ server. The authoritative data source is the server's own `README.md` and the
 project wiki (`wiki/MCP.md`, `wiki/API.md`, `wiki/Skill.md`). When something
 disagrees with those, trust the wiki and `README.md`.
 
-## When to read each reference
+## Choosing the right setup
 
-- **Before installing or configuring a client** → `references/clients.md`
-  (one section per client: Claude, Codex, OpenCode, VS Code, Hermes,
-  Google Antigravity, Pi, and generic HTTP).
-- **Before running the server / issuing auth** → `references/install.md`
-  (install via npx github / GitHub Packages, run, API-key auth).
-- **Choosing how to call a tool / what fields exist** → `references/tools.md`
-  (all 15 tools mapped 1:1 to REST endpoints, plus the enums).
-- **Deciding stdio vs http, or running a workflow** → `references/usage.md`
-  (transport choice, the two-ports gotcha, and the canned workflows).
+  ┌─ ¿El MCP server y el cliente están en la misma máquina?
+  │
+  ├─ SÍ → Usar stdio (no necesita server persistente)
+  │       Config: references/clients.md (sección de tu cliente)
+  │       El cliente spawnea el proceso automáticamente.
+  │
+  └─ NO → Usar HTTP (server corre aparte, clientes remotos)
+          ├─ ¿Quieres daemonización automática (PM2)?
+          │   └─ yamtrack-mcp serve --port ...
+          │       Admin: serve:status|logs|restart|stop|save
+          │       Config: references/clients.md → HTTP section
+          │
+          └─ ¿Ya tienes supervisor (systemd, Docker)?
+              └─ yamtrack-mcp --transport http
+                  Config: references/clients.md → HTTP section
 
 ## Mental model
 

@@ -75,9 +75,14 @@ npm run build      # compile src/ -> dist/ (strict TypeScript)
 After installing globally (method 1):
 
 ```bash
-yamtrack-mcp --transport stdio   # default, for local stdio clients
-yamtrack-mcp --transport http    # starts HTTP server on :8080/mcp
-yamtrack-mcp --help              # show all options
+yamtrack-mcp --transport stdio           # default, for local stdio clients
+yamtrack-mcp --transport http            # starts HTTP server on :8080/mcp
+yamtrack-mcp serve --port 9123           # daemonized HTTP server via PM2
+yamtrack-mcp serve:status                # check server status
+yamtrack-mcp serve:restart               # restart
+yamtrack-mcp serve:stop                  # stop
+yamtrack-mcp serve:logs                  # log file paths
+yamtrack-mcp --help                      # show all options
 ```
 
 With npx (method 2, no install):
@@ -246,10 +251,13 @@ request/response shapes.
 
 ## Resilience
 
-MCP clients (Claude Desktop, OpenCode, etc.) respawn the stdio process on exit,
-and for the `http` transport your service manager (systemd, Docker
-`restart:`, pm2) should handle restarts. A `supervise.sh` helper that retries on
-crash is also available in the repo for standalone runs.
+For stdio, the MCP client respawns the process on exit. For HTTP, use the
+`serve` subcommand which runs under PM2 with auto-restart and log management
+(no separate PM2 install needed).
+
+Alternatively, run `yamtrack-mcp --transport http` with your own supervisor
+(systemd, Docker `restart:`, etc.). A `supervise.sh` helper is also available
+in the repo.
 
 ## Project structure
 

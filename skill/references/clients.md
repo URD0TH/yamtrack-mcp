@@ -150,12 +150,15 @@ Pi reads MCP config as JSON with the `mcpServers` key.
 
 ## HTTP transport (any client that supports `url` + `headers`)
 
-Run the server with `yamtrack-mcp --transport http` (optionally
-`--port <n>`, default `8080`). It listens on `POST /mcp` (StreamableHTTP,
-stateless) and authenticates each connection via the
-`Authorization: Bearer <key>` header. This works for any client that connects to
-a remote MCP URL (e.g. Claude Code, OpenCode `type: "http"`, VS Code,
-Antigravity, Pi, Cursor).
+Run the server with either:
+
+  yamtrack-mcp --transport http     # foreground, terminal-bound
+  yamtrack-mcp serve --port 8080    # daemonized under PM2 (see install.md)
+
+It listens on `POST /mcp` (StreamableHTTP, stateless) and authenticates each
+connection via the `Authorization: Bearer <key>` header. This works for any
+client that connects to a remote MCP URL (e.g. Claude Code, OpenCode
+`type: "http"`, VS Code, Antigravity, Pi, Cursor).
 
 ```json
 {

@@ -116,12 +116,36 @@ the Yamtrack REST API.
 > `YAMTRACK_BASE_URL` is the Yamtrack REST API (`/api`), **not** the `/mcp`
 > endpoint (see `references/usage.md` for the two-ports gotcha).
 
-## Keeping it alive
+## Persistent service (PM2)
+
+After installing globally, daemonize the server with auto-restart and log
+management — no separate PM2 installation needed:
+
+  yamtrack-mcp serve --port 9123 --base-url http://localhost:8000/api
+
+Starts the server under PM2 (auto-restart on crash, logs to
+`~/yamtrack-mcp-*.log`). Terminal se libera inmediatamente.
+
+Admin subcommands (todo a través del mismo binario):
+
+  yamtrack-mcp serve:status     # estado, uptime, restarts
+  yamtrack-mcp serve:logs       # rutas de logs
+  yamtrack-mcp serve:restart    # reiniciar
+  yamtrack-mcp serve:stop       # detener y remover de PM2
+  yamtrack-mcp serve:save       # guardar lista para persistencia en boot
+
+Para auto-arranque al boot (requiere PM2 CLI global):
+
+  npm install -g pm2
+  pm2 startup                    # sigue las instrucciones
+  yamtrack-mcp serve:save        # o pm2 save
+
+## Keeping it alive (alternatives)
 
 For stdio, the MCP client respawns the process on exit. For the `http`
-transport, let your service manager (systemd, Docker `restart:`, pm2) restart
-it. A `supervise.sh` helper that retries on crash is also available in the repo
-for standalone runs.
+transport, you can also use your own service manager (systemd, Docker
+`restart:`). A `supervise.sh` helper that retries on crash is also available
+in the repo for standalone runs.
 
 ## Verify the build
 
