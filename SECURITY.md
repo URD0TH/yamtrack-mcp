@@ -27,12 +27,6 @@ This is a **self-hosted** MCP server. The Yamtrack API key lives on the user's o
 Report via **GitHub Private Vulnerability Reporting**:
 https://github.com/URD0TH/yamtrack-mcp/security/advisories/new
 
-For encrypted reports, use the GPG key below:
-
-```
-Fingerprint: — contact maintainer for key —
-```
-
 ## Disclosure Policy
 
 We follow **Coordinated Vulnerability Disclosure** (CVD):

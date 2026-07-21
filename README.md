@@ -1,5 +1,7 @@
 # yamtrack-mcp
 
+[![Security Policy](https://github.com/URD0TH/yamtrack-mcp/security/policy/badge.svg)](https://github.com/URD0TH/yamtrack-mcp/security/policy)
+
 A standalone [Model Context Protocol](https://modelcontextprotocol.org) server
 (**stdio** or **http** transport, TypeScript) that exposes the [Yamtrack](https://github.com/FuzzyGrim/Yamtrack)
 REST API as tools for LLMs (Claude Desktop, OpenCode, VS Code, Hermes, etc.).
