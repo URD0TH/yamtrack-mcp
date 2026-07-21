@@ -1,10 +1,11 @@
 # yamtrack-mcp
 
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](https://github.com/URD0TH/yamtrack-mcp/security/policy)
+
 [Leer en español](README.es.md)
 
 A standalone [Model Context Protocol](https://modelcontextprotocol.org) server
-(**stdio** or **http** transport, TypeScript) that exposes the [Yamtrack](https://github.com/FuzzyGrim/Yamtrack)
+(**stdio** or **http** transport, TypeScript) that exposes the [Yamtrack](https://github.com/URD0TH/Yamtrack)
 REST API as tools for LLMs (Claude Desktop, OpenCode, VS Code, Hermes, etc.).
 
 It runs on **any machine** and talks to a Yamtrack instance over its public
@@ -75,15 +76,20 @@ npm run build      # compile src/ -> dist/ (strict TypeScript)
 After installing globally (method 1 or 2):
 
 ```bash
-yamtrack-mcp --transport stdio           # default, for local stdio clients
-yamtrack-mcp --transport http            # starts HTTP server on :8080/mcp
-yamtrack-mcp serve --port 9123           # daemonized HTTP server via PM2
-yamtrack-mcp serve:status                # check server status
-yamtrack-mcp serve:restart               # restart
-yamtrack-mcp serve:stop                  # stop
-yamtrack-mcp serve:logs                  # log file paths
-yamtrack-mcp --help                      # show all options
+yamtrack-mcp --transport http --port 8080      # foreground (dev / testing)
+yamtrack-mcp serve --port 9123                 # daemonized via PM2 (production)
+yamtrack-mcp --transport stdio                 # default, for local stdio clients
+yamtrack-mcp serve:status                      # check server status
+yamtrack-mcp serve:restart                     # restart
+yamtrack-mcp serve:stop                        # stop
+yamtrack-mcp serve:logs                        # log file paths
+yamtrack-mcp --help                            # show all options
 ```
+
+> **`serve` vs without `serve`:** Without `serve` the process runs in the
+> foreground — use it for development, testing, or with your own supervisor
+> (systemd, Docker `restart:`). With `serve` the process daemonizes via PM2
+> with auto-restart and log management (no separate PM2 install required).
 
 With npx (no install):
 

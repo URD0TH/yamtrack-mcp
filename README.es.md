@@ -77,15 +77,20 @@ npm run build      # compilar src/ -> dist/ (TypeScript estricto)
 Después de instalar globalmente (método 1 o 2):
 
 ```bash
-yamtrack-mcp --transport stdio           # por defecto, para clientes stdio locales
-yamtrack-mcp --transport http            # inicia servidor HTTP en :8080/mcp
-yamtrack-mcp serve --port 9123           # servidor HTTP daemonizado vía PM2
-yamtrack-mcp serve:status                # ver estado del servidor
-yamtrack-mcp serve:restart               # reiniciar
-yamtrack-mcp serve:stop                  # detener
-yamtrack-mcp serve:logs                  # rutas de logs
-yamtrack-mcp --help                      # mostrar todas las opciones
+yamtrack-mcp --transport http --port 8080      # primer plano (dev / testing)
+yamtrack-mcp serve --port 9123                 # daemonizado vía PM2 (producción)
+yamtrack-mcp --transport stdio                 # por defecto, para clientes stdio locales
+yamtrack-mcp serve:status                      # ver estado del servidor
+yamtrack-mcp serve:restart                     # reiniciar
+yamtrack-mcp serve:stop                        # detener
+yamtrack-mcp serve:logs                        # rutas de logs
+yamtrack-mcp --help                            # mostrar todas las opciones
 ```
+
+> **`serve` vs sin `serve`:** Sin `serve` el proceso corre en primer plano —
+> usalo para desarrollo, testing, o con tu propio supervisor (systemd, Docker
+> `restart:`). Con `serve` el proceso se daemoniza via PM2 con autoreinicio y
+> gestión de logs (no requiere instalación separada de PM2).
 
 Con npx (sin instalar):
 
