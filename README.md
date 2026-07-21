@@ -1,6 +1,6 @@
 # yamtrack-mcp
 
-[![Security Policy](https://github.com/URD0TH/yamtrack-mcp/security/policy/badge.svg)](https://github.com/URD0TH/yamtrack-mcp/security/policy)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](https://github.com/URD0TH/yamtrack-mcp/security/policy)
 [Leer en español](README.es.md)
 
 A standalone [Model Context Protocol](https://modelcontextprotocol.org) server
