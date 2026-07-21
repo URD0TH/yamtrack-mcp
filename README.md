@@ -1,6 +1,7 @@
 # yamtrack-mcp
 
 [![Security Policy](https://github.com/URD0TH/yamtrack-mcp/security/policy/badge.svg)](https://github.com/URD0TH/yamtrack-mcp/security/policy)
+[Leer en español](README.es.md)
 
 A standalone [Model Context Protocol](https://modelcontextprotocol.org) server
 (**stdio** or **http** transport, TypeScript) that exposes the [Yamtrack](https://github.com/FuzzyGrim/Yamtrack)
@@ -274,14 +275,14 @@ yamtrack-mcp/
 
 ## FAQ
 
-### `npm install -g github:URD0TH/yamtrack-mcp` no funciona
+### `npm install -g github:URD0TH/yamtrack-mcp` does not work
 
-Ese comando crea un enlace simbólico en node\_modules global apuntando a un
-directorio temporal de npm que se elimina al terminar la instalación,
-dejando el binario inservible. Es un problema conocido de `npm install -g`
-con dependencias git.
+This command creates a symlink in the global node\_modules pointing to a
+temporary npm directory that gets deleted after installation, leaving a
+broken binary. This is a known issue with `npm install -g` and git
+dependencies.
 
-Usá en su lugar el tarball del release (método 1) o el paquete de GitHub Packages (método 2).
+Use the release tarball (method 1) or GitHub Packages (method 2) instead.
 
 ## License
 
