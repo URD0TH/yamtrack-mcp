@@ -285,4 +285,4 @@ Usá en su lugar el tarball del release (método 1) o el paquete de GitHub Packa
 
 ## License
 
-Part of the Yamtrack project. See the main repository license.
+Part of the [Yamtrack project](https://github.com/URD0TH/Yamtrack). See the main repository license.

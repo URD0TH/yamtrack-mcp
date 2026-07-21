@@ -66,4 +66,4 @@ Yamtrack instance. Then configure your client — see `references/clients.md`.
 
 ## License
 
-Part of the Yamtrack project. See `LICENSE`.
+Part of the [Yamtrack project](https://github.com/URD0TH/Yamtrack). See `LICENSE`.
