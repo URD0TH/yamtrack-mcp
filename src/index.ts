@@ -108,7 +108,7 @@ function bearerFrom(header: string | string[] | undefined): string | undefined {
 }
 
 function createMcpServer(client: YamtrackClient): McpServer {
-  const server = new McpServer({ name: "yamtrack", version: "0.1.0" });
+  const server = new McpServer({ name: "yamtrack", version: "0.1.1" });
   registerTools(server, client);
   return server;
 }
