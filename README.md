@@ -76,7 +76,8 @@ npm run build      # compile src/ -> dist/ (strict TypeScript)
 After installing globally (method 1 or 2):
 
 ```bash
-yamtrack-mcp --transport http --port 8080      # foreground (dev / testing)
+yamtrack-mcp --transport http --port 8080                                # foreground (dev / testing)
+yamtrack-mcp --transport http --port 8080 --base-url http://url:port/api # foreground, custom instance
 yamtrack-mcp serve --port 9123                 # daemonized via PM2 (production)
 yamtrack-mcp --transport stdio                 # default, for local stdio clients
 yamtrack-mcp serve:status                      # check server status
