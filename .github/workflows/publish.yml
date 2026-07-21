@@ -46,22 +46,31 @@ jobs:
           registry-url: https://npm.pkg.github.com
           cache: "npm"
 
-      - name: Bump version (workflow_dispatch only)
-        if: github.event_name == 'workflow_dispatch'
+      - name: Bump version
         run: |
           VERSION="${TAG#v}"
+          MAJOR_MINOR=$(echo "$VERSION" | sed 's/\.[0-9]*$//')
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
           npm version "$VERSION" --no-git-tag-version
           sed -i "s/version: \"[0-9.]*\"/version: \"$VERSION\"/" src/index.ts
           sed -i "s/version: \"[0-9.]*\"/version: \"$VERSION\"/" tests/server.test.ts
-          git add package.json package-lock.json src/index.ts tests/server.test.ts
-          git commit -m "chore: bump version to $VERSION"
-          git tag "$TAG"
-          git push origin HEAD:"${{ github.ref_name }}"
-          git push origin "$TAG"
+          sed -i "s/| [0-9]*\.[0-9]*\.x |/| ${MAJOR_MINOR}.x |/" SECURITY.md
 
-      - name: Verify tag matches package.json version
+          if git diff --exit-code --quiet; then
+            echo "Versions already match, skipping bump."
+          else
+            git add package.json package-lock.json src/index.ts tests/server.test.ts SECURITY.md
+            git commit -m "chore: bump version to $VERSION [skip ci]"
+            git tag -d "$TAG" 2>/dev/null || true
+            git tag "$TAG"
+            BRANCH="${{ github.event_name == 'workflow_dispatch' && github.ref_name || github.event.repository.default_branch }}"
+            git push origin HEAD:"$BRANCH"
+            git push origin "$TAG" --force
+          fi
+
+      - name: Verify version matches tag
         run: |
           pkg="v$(node -p "require('./package.json').version")"
           if [ "$pkg" != "$TAG" ]; then
