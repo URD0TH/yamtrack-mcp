@@ -1,11 +1,12 @@
 # yamtrack-mcp
 
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](https://github.com/URD0TH/yamtrack-mcp/security/policy)
+
 [Read in English](README.md)
 
 Un servidor [Model Context Protocol](https://modelcontextprotocol.org)
 independiente (transporte **stdio** o **http**, TypeScript) que expone la
-API REST de [Yamtrack](https://github.com/FuzzyGrim/Yamtrack) como herramientas
+API REST de [Yamtrack](https://github.com/URD0TH/Yamtrack) como herramientas
 para LLMs (Claude Desktop, OpenCode, VS Code, Hermes, etc.).
 
 Funciona en **cualquier máquina** y se comunica con una instancia de Yamtrack
