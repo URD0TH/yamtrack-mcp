@@ -14,20 +14,17 @@ npm install -g https://github.com/URD0TH/yamtrack-mcp/releases/latest/download/u
 
 After this, the `yamtrack-mcp` command is available everywhere.
 
-> **Security note:** pin an explicit version (change `0.1.2` to the tag you
-> want) rather than relying on `latest`, so a compromised push can't be pulled
-> automatically.
-
-## 2. npx (no install — good for testing)
-
-Runs the package on the fly without installing. Compiles TypeScript on every
-launch (slower startup). No token required.
+Or skip the install and run directly with npx:
 
 ```bash
 npx github:URD0TH/yamtrack-mcp
 ```
 
-## 3. GitHub Packages (scoped registry — requires a token)
+> **Security note:** pin an explicit version (change `0.1.2` to the tag you
+> want) rather than relying on `latest`, so a compromised push can't be pulled
+> automatically.
+
+## 2. GitHub Packages (scoped registry — requires a token)
 
 ```bash
 echo "@urd0th:registry=https://npm.pkg.github.com" >> ~/.npmrc
@@ -47,7 +44,7 @@ node dist/index.js --help
 
 ## Run
 
-After installing globally (method 1):
+After installing globally (method 1 or 2):
 
 ```bash
 yamtrack-mcp --transport stdio   # default, for local stdio clients
@@ -55,7 +52,7 @@ yamtrack-mcp --transport http    # starts HTTP server on :8080/mcp
 yamtrack-mcp --help              # show all options
 ```
 
-With npx (method 2, no install):
+With npx (no install):
 
 ```bash
 npx github:URD0TH/yamtrack-mcp --transport http
@@ -165,5 +162,4 @@ directorio temporal de npm que se elimina al terminar la instalación,
 dejando el binario inservible. Es un problema conocido de `npm install -g`
 con dependencias git.
 
-Usá en su lugar el tarball del release (método 1), `npx github:URD0TH/yamtrack-mcp`
-(método 2), o el paquete de GitHub Packages (método 3).
+Usá en su lugar el tarball del release (método 1) o el paquete de GitHub Packages (método 2).
