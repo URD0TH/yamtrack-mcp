@@ -18,7 +18,7 @@ export class YamtrackClient {
       opts.baseUrl ??
       process.env.YAMTRACK_BASE_URL ??
       "http://localhost:8000/api"
-    ).replace(/\/+$/, "");
+    ).replace(/\/$/, "");
     this.access = opts.token ?? process.env.YAMTRACK_API_KEY;
   }
 

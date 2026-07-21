@@ -3,10 +3,10 @@ import http from "node:http";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import pm2 from "pm2";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import pm2 from "pm2";
 import { YamtrackClient } from "./client.js";
 import { registerTools } from "./tools.js";
 
@@ -103,7 +103,7 @@ function parseArgs(argv: string[]): Record<string, string> {
 function bearerFrom(header: string | string[] | undefined): string | undefined {
   const value = Array.isArray(header) ? header[0] : header;
   if (!value) return undefined;
-  const match = /^Bearer\s+(.+)$/i.exec(value.trim());
+  const match = /^Bearer\s+(\S+)$/i.exec(value.trim());
   return match ? match[1].trim() : undefined;
 }
 
@@ -181,7 +181,7 @@ async function handleServe(opts: Record<string, string>): Promise<void> {
     opts["base-url"] ??
     process.env.YAMTRACK_BASE_URL ??
     "http://localhost:8000/api"
-  ).replace(/\/+$/, "");
+  ).replace(/\/$/, "");
   const token = opts.token ?? process.env.YAMTRACK_API_KEY;
   const script = process.argv[1];
 
@@ -190,7 +190,14 @@ async function handleServe(opts: Record<string, string>): Promise<void> {
     console.error("Pass --token <key> or set YAMTRACK_API_KEY.");
   }
 
-  const pm2Args = ["--transport", "http", "--port", String(port), "--base-url", baseUrl];
+  const pm2Args = [
+    "--transport",
+    "http",
+    "--port",
+    String(port),
+    "--base-url",
+    baseUrl,
+  ];
   if (token) pm2Args.push("--token", token);
 
   await pm2Connect();
@@ -215,7 +222,7 @@ async function handleServeStatus(): Promise<void> {
   const list = await pm2List();
   await pm2Disconnect();
 
-  const proc = list.find((p: any) => p.name === "yamtrack-mcp");
+  const proc = list.find((p: { name?: string }) => p.name === "yamtrack-mcp");
   if (!proc) {
     console.error("yamtrack-mcp is not running");
     return;
@@ -223,7 +230,9 @@ async function handleServeStatus(): Promise<void> {
   console.error(`name:     ${proc.name}`);
   console.error(`status:   ${proc.pm2_env?.status}`);
   console.error(`pid:      ${proc.pid}`);
-  const uptime = proc.pm2_env?.pm_uptime ? Math.floor((Date.now() - proc.pm2_env.pm_uptime) / 1000) + "s" : "N/A";
+  const uptime = proc.pm2_env?.pm_uptime
+    ? `${Math.floor((Date.now() - proc.pm2_env.pm_uptime) / 1000)}s`
+    : "N/A";
   console.error(`uptime:   ${uptime}`);
   console.error(`restarts: ${proc.pm2_env?.restart_time ?? 0}`);
 }
@@ -310,7 +319,7 @@ async function main(): Promise<void> {
     opts["base-url"] ??
     process.env.YAMTRACK_BASE_URL ??
     "http://localhost:8000/api"
-  ).replace(/\/+$/, "");
+  ).replace(/\/$/, "");
   const startupToken = opts.token ?? process.env.YAMTRACK_API_KEY;
 
   const transport = opts.transport ?? "stdio";

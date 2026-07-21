@@ -108,7 +108,7 @@ describe("read-only tools", () => {
   it("search_media hits /search/ without auth", async () => {
     await h.stop();
     h = await makeHarness({
-      handler: (req) => ({
+      handler: (_req) => ({
         status: 200,
         body: {
           page: 1,
