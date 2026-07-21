@@ -3,19 +3,19 @@
 Requires Node.js 18+. The server talks to a reachable Yamtrack instance over its
 public REST API. Distributed via GitHub only (not npmjs.com).
 
-## 1. Global install from git (recommended — no registry, no auth)
+## 1. Global install from release tarball (recommended)
 
-Installs the binary once in your PATH. Compiles TypeScript on install, then
-runs instantly on every launch. No token required.
+Download the pre-built tarball from the [latest release](https://github.com/URD0TH/yamtrack-mcp/releases/latest)
+and install globally:
 
 ```bash
-npm install -g github:URD0TH/yamtrack-mcp
+npm install -g https://github.com/URD0TH/yamtrack-mcp/releases/latest/download/urd0th-yamtrack-mcp-0.1.2.tgz
 ```
 
 After this, the `yamtrack-mcp` command is available everywhere.
 
-> **Security note:** pin a tag or commit (`github:URD0TH/yamtrack-mcp#v0.1.0`)
-> rather than the default branch, so a compromised push can't be pulled
+> **Security note:** pin an explicit version (change `0.1.2` to the tag you
+> want) rather than relying on `latest`, so a compromised push can't be pulled
 > automatically.
 
 ## 2. npx (no install — good for testing)
@@ -155,3 +155,15 @@ npm run verify   # typecheck (tsc) + lint/format (biome) + tests (vitest)
 
 Smoke test the server: `node dist/index.js --help`, then an MCP `initialize` +
 `tools/list`.
+
+## FAQ
+
+### `npm install -g github:URD0TH/yamtrack-mcp` no funciona
+
+Ese comando crea un enlace simbólico en node\_modules global apuntando a un
+directorio temporal de npm que se elimina al terminar la instalación,
+dejando el binario inservible. Es un problema conocido de `npm install -g`
+con dependencias git.
+
+Usá en su lugar el tarball del release (método 1), `npx github:URD0TH/yamtrack-mcp`
+(método 2), o el paquete de GitHub Packages (método 3).
