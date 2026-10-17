@@ -165,7 +165,15 @@ export function registerTools(server, client) {
     }, async (c, a) => {
         const raw = await c.request("GET", `/media/${a.media_type}/`, {
             query: {
-                status: a.status,
+                ...(["Planning", "In progress", "Paused", "Completed", "Dropped"].includes(String(a.status))
+                    ? {
+                        status: a.status === "Planning" ? 0 :
+                            a.status === "In progress" ? 1 :
+                                a.status === "Paused" ? 2 :
+                                    a.status === "Completed" ? 3 :
+                                        a.status === "Dropped" ? 4 : undefined,
+                    }
+                    : {}),
                 sort: a.sort,
                 search: a.search,
                 page: a.page,
@@ -253,6 +261,23 @@ export function registerTools(server, client) {
             body.progress = a.progress;
         return c.request("POST", "/media/manual/create/", { body });
     }, client);
+    // Resolve an instance id to the provider identifiers required by API v1.
+    async function resolveTrackedEntry(c, mediaType, instanceId) {
+        let page = 1;
+        while (true) {
+            const raw = (await c.request("GET", `/media/${mediaType}/`, {
+                query: { page, per_page: 100 },
+            }));
+            const results = (raw.results ?? []);
+            const match = results.find((entry) => Number(entry.id) === instanceId);
+            if (match)
+                return match;
+            if (results.length === 0 || !raw.next) {
+                throw new Error(`Tracked entry ${instanceId} not found.`);
+            }
+            page++;
+        }
+    }
     register(server, "update_entry", "Update a tracked media item (status, score, progress, notes).", {
         media_type: z.enum(MEDIA_TYPES).describe("Type of media."),
         instance_id: z.coerce.number().int().describe("Tracked item instance id."),
@@ -263,29 +288,36 @@ export function registerTools(server, client) {
         start_date: z.string().optional().describe("Start date/time (ISO 8601)."),
         end_date: z.string().optional().describe("End date/time (ISO 8601)."),
     }, async (c, a) => {
+        const entry = await resolveTrackedEntry(c, String(a.media_type), Number(a.instance_id));
+        const item = entry.item;
+        if (!item?.source || !item?.media_id) {
+            throw new Error("Tracked entry has no source/media_id.");
+        }
         const body = {};
-        if (a.status !== undefined)
-            body.status = a.status;
-        if (a.score !== undefined)
-            body.score = a.score;
-        if (a.progress !== undefined)
-            body.progress = a.progress;
-        if (a.notes !== undefined)
-            body.notes = a.notes;
-        if (a.start_date !== undefined)
-            body.start_date = a.start_date;
-        if (a.end_date !== undefined)
-            body.end_date = a.end_date;
-        return c.request("PATCH", `/media/${a.media_type}/${a.instance_id}/`, { body });
+        for (const field of ["status", "score", "progress", "notes", "start_date", "end_date"]) {
+            if (a[field] !== undefined)
+                body[field] = a[field];
+        }
+        return c.request("PATCH", `/media/${a.media_type}/${encodeURIComponent(String(item.source))}/${encodeURIComponent(String(item.media_id))}/`, { body });
     }, client);
     register(server, "update_progress", "Increase or decrease progress on a tracked item.", {
         media_type: z.enum(MEDIA_TYPES).describe("Type of media."),
         instance_id: z.coerce.number().int().describe("Tracked item instance id."),
         operation: z.enum(PROGRESS_OP).describe("increase or decrease."),
     }, async (c, a) => {
-        return c.request("POST", `/media/${a.media_type}/${a.instance_id}/progress/`, {
-            body: { operation: a.operation },
-        });
+        const entry = await resolveTrackedEntry(c, String(a.media_type), Number(a.instance_id));
+        const item = entry.item;
+        if (!item?.source || !item?.media_id) {
+            throw new Error("Tracked entry has no source/media_id.");
+        }
+        const current = Number(entry.progress);
+        if (!Number.isInteger(current) || current < 0) {
+            throw new Error("Invalid current progress.");
+        }
+        const progress = a.operation === "increase"
+            ? current + 1
+            : Math.max(0, current - 1);
+        return c.request("PATCH", `/media/${a.media_type}/${encodeURIComponent(String(item.source))}/${encodeURIComponent(String(item.media_id))}/`, { body: { progress } });
     }, client);
     register(server, "update_score", "Update the score (0-10) of a tracked item.", {
         media_type: z.enum(MEDIA_TYPES).describe("Type of media."),
