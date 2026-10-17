@@ -325,7 +325,7 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       if (a.notes !== undefined) body.notes = a.notes;
       if (a.start_date !== undefined) body.start_date = a.start_date;
       if (a.end_date !== undefined) body.end_date = a.end_date;
-      return c.request("POST", `/media/${a.media_type}/create/`, { body });
+      return c.request("POST", `/media/${a.media_type}/`, { body });
     },
     client,
   );

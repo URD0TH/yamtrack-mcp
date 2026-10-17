@@ -243,7 +243,7 @@ export function registerTools(server, client) {
             body.start_date = a.start_date;
         if (a.end_date !== undefined)
             body.end_date = a.end_date;
-        return c.request("POST", `/media/${a.media_type}/create/`, { body });
+        return c.request("POST", `/media/${a.media_type}/`, { body });
     }, client);
     register(server, "manual_create", "Create a media entry manually (no external provider).", {
         media_type: z.enum(MEDIA_TYPES).describe("Type of media."),
