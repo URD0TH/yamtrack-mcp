@@ -105,7 +105,7 @@ function bearerFrom(header) {
     return match ? match[1].trim() : undefined;
 }
 function createMcpServer(client) {
-    const server = new McpServer({ name: "yamtrack", version: "0.1.1" });
+    const server = new McpServer({ name: "yamtrack", version: "0.1.2" });
     registerTools(server, client);
     return server;
 }

@@ -229,8 +229,17 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
     async (c, a) => {
       const raw = await c.request("GET", `/media/${a.media_type}/`, {
         query: {
-          status: a.status,
-          sort: a.sort,
+          ...(["Planning", "In progress", "Paused", "Completed", "Dropped"].includes(String(a.status))
+          ? {
+              status:
+                a.status === "Planning" ? 0 :
+                a.status === "In progress" ? 1 :
+                a.status === "Paused" ? 2 :
+                a.status === "Completed" ? 3 :
+                a.status === "Dropped" ? 4 : undefined,
+            }
+          : {}),
+        sort: a.sort,
           search: a.search,
           page: a.page,
           per_page: a.per_page,
@@ -310,13 +319,13 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
         source: a.source,
         media_type: a.media_type,
       };
-      if (a.status !== undefined) body.status = a.status;
+      if (a.status !== undefined && a.status !== "Planning") body.status = a.status;
       if (a.score !== undefined) body.score = a.score;
       if (a.progress !== undefined) body.progress = a.progress;
       if (a.notes !== undefined) body.notes = a.notes;
       if (a.start_date !== undefined) body.start_date = a.start_date;
       if (a.end_date !== undefined) body.end_date = a.end_date;
-      return c.request("POST", `/media/${a.media_type}/create/`, { body });
+      return c.request("POST", `/media/${a.media_type}/`, { body });
     },
     client,
   );
@@ -343,6 +352,30 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
     client,
   );
 
+
+  // Resolve an instance id to the provider identifiers required by API v1.
+  async function resolveTrackedEntry(
+    c: YamtrackClient,
+    mediaType: string,
+    instanceId: number,
+  ): Promise<Rec> {
+    let page = 1;
+    while (true) {
+      const raw = (await c.request("GET", `/media/${mediaType}/`, {
+        query: { page, per_page: 100 },
+      })) as Rec;
+
+      const results = (raw.results ?? []) as Rec[];
+      const match = results.find((entry) => Number(entry.id) === instanceId);
+      if (match) return match;
+
+      if (results.length === 0 || !raw.next) {
+        throw new Error(`Tracked entry ${instanceId} not found.`);
+      }
+      page++;
+    }
+  }
+
   register(
     server,
     "update_entry",
@@ -358,14 +391,22 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       end_date: z.string().optional().describe("End date/time (ISO 8601)."),
     },
     async (c, a) => {
+      const entry = await resolveTrackedEntry(c, String(a.media_type), Number(a.instance_id));
+      const item = entry.item as Rec;
+      if (!item?.source || !item?.media_id) {
+        throw new Error("Tracked entry has no source/media_id.");
+      }
+
       const body: Record<string, unknown> = {};
-      if (a.status !== undefined) body.status = a.status;
-      if (a.score !== undefined) body.score = a.score;
-      if (a.progress !== undefined) body.progress = a.progress;
-      if (a.notes !== undefined) body.notes = a.notes;
-      if (a.start_date !== undefined) body.start_date = a.start_date;
-      if (a.end_date !== undefined) body.end_date = a.end_date;
-      return c.request("PATCH", `/media/${a.media_type}/${a.instance_id}/`, { body });
+      for (const field of ["status", "score", "progress", "notes", "start_date", "end_date"]) {
+        if (a[field] !== undefined) body[field] = a[field];
+      }
+
+      return c.request(
+        "PATCH",
+        `/media/${a.media_type}/${encodeURIComponent(String(item.source))}/${encodeURIComponent(String(item.media_id))}/`,
+        { body },
+      );
     },
     client,
   );
@@ -380,9 +421,26 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       operation: z.enum(PROGRESS_OP).describe("increase or decrease."),
     },
     async (c, a) => {
-      return c.request("POST", `/media/${a.media_type}/${a.instance_id}/progress/`, {
-        body: { operation: a.operation },
-      });
+      const entry = await resolveTrackedEntry(c, String(a.media_type), Number(a.instance_id));
+      const item = entry.item as Rec;
+      if (!item?.source || !item?.media_id) {
+        throw new Error("Tracked entry has no source/media_id.");
+      }
+
+      const current = Number(entry.progress);
+      if (!Number.isInteger(current) || current < 0) {
+        throw new Error("Invalid current progress.");
+      }
+
+      const progress = a.operation === "increase"
+        ? current + 1
+        : Math.max(0, current - 1);
+
+      return c.request(
+        "PATCH",
+        `/media/${a.media_type}/${encodeURIComponent(String(item.source))}/${encodeURIComponent(String(item.media_id))}/`,
+        { body: { progress } },
+      );
     },
     client,
   );
@@ -413,7 +471,21 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       instance_id: z.coerce.number().int().describe("Tracked item instance id."),
     },
     async (c, a) => {
-      return c.request("DELETE", `/media/${a.media_type}/${a.instance_id}/delete/`);
+      const entry = await resolveTrackedEntry(
+        c,
+        String(a.media_type),
+        Number(a.instance_id),
+      );
+      const item = entry.item as Rec;
+
+      if (!item?.source || !item?.media_id) {
+        throw new Error("Tracked entry has no source/media_id.");
+      }
+
+      // API v1 identifies media by provider, not tracked instance id.
+      const path = `/media/${a.media_type}/${encodeURIComponent(String(item.source))}/${encodeURIComponent(String(item.media_id))}/`;
+
+      return c.request("DELETE", path);
     },
     client,
   );
