@@ -1,8 +1,12 @@
 FROM node:22-alpine AS builder
 RUN apk add --no-cache git
 WORKDIR /app
+
 ARG REPO_REF=master
-RUN git clone --depth 1 --branch "$REPO_REF" https://github.com/wlmirand/yamtrack-mcp.git .
+ARG CACHE_BUST=1
+RUN echo "Build revision: $CACHE_BUST" \
+    && git clone --depth 1 --branch "$REPO_REF" https://github.com/wlmirand/yamtrack-mcp.git .
+
 RUN npm ci --ignore-scripts && npm run build
 
 FROM node:22-alpine
