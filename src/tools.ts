@@ -319,7 +319,7 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
         source: a.source,
         media_type: a.media_type,
       };
-      if (a.status !== undefined) body.status = a.status;
+      if (a.status !== undefined && a.status !== "Planning") body.status = a.status;
       if (a.score !== undefined) body.score = a.score;
       if (a.progress !== undefined) body.progress = a.progress;
       if (a.notes !== undefined) body.notes = a.notes;

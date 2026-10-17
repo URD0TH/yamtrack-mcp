@@ -231,7 +231,7 @@ export function registerTools(server, client) {
             source: a.source,
             media_type: a.media_type,
         };
-        if (a.status !== undefined)
+        if (a.status !== undefined && a.status !== "Planning")
             body.status = a.status;
         if (a.score !== undefined)
             body.score = a.score;
