@@ -471,7 +471,21 @@ export function registerTools(server: McpServer, client: YamtrackClient): void {
       instance_id: z.coerce.number().int().describe("Tracked item instance id."),
     },
     async (c, a) => {
-      return c.request("DELETE", `/media/${a.media_type}/${a.instance_id}/delete/`);
+      const entry = await resolveTrackedEntry(
+        c,
+        String(a.media_type),
+        Number(a.instance_id),
+      );
+      const item = entry.item as Rec;
+
+      if (!item?.source || !item?.media_id) {
+        throw new Error("Tracked entry has no source/media_id.");
+      }
+
+      // API v1 identifies media by provider, not tracked instance id.
+      const path = `/media/${a.media_type}/${encodeURIComponent(String(item.source))}/${encodeURIComponent(String(item.media_id))}/`;
+
+      return c.request("DELETE", path);
     },
     client,
   );
